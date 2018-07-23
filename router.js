@@ -2,7 +2,7 @@ var UserController = require('./controllers/UserController');
 var ProductController = require('./controllers/ProductController');
 var CompanyController = require('./controllers/CompanyController');
 var CategoryController = require('./controllers/CategoryController');
-var SubsectorController = require('./controllers/SubsectorController');
+var SubcategoryController = require('./controllers/SubcategoryController');
 var CountriesController = require('./controllers/CountriesController');
 var StatesController = require('./controllers/StatesController');
 var AdminController = require('./controllers/AdminController');
@@ -286,14 +286,14 @@ module.exports = function (app) {
     apiRoutes.delete('/states/:id', StatesController.DeleteState);
 
     //SubSector
-   apiRoutes.get('/subsector/:id', SubsectorController.GetSubsector);
-   apiRoutes.post('/subsector', SubsectorController.CreateSubSector);
-   apiRoutes.put('/subsector/:id', SubsectorController.UpdateSubSector);
-   apiRoutes.delete('/subsector/:id', SubsectorController.DeleteSubSector);
-   apiRoutes.post('/filterSubSector', SubsectorController.FilterSubSectors);
-   apiRoutes.get('/subsectors', SubsectorController.Subsector);
+   apiRoutes.get('/subcategory/:id', SubcategoryController.GetSubcategory);
+   apiRoutes.post('/subcategory', SubcategoryController.CreateSubCategory);
+   apiRoutes.put('/subcategory/:id', SubcategoryController.UpdateSubCategory);
+   apiRoutes.delete('/subcategory/:id', SubcategoryController.DeleteSubCategory);
+   apiRoutes.post('/filterSubCategory', SubcategoryController.FilterSubCategories);
+   apiRoutes.get('/subcategories', SubcategoryController.Subcategory);
 
-    apiRoutes.get('/subsector/:sector_id', SubsectorController.Subsector);
+    //apiRoutes.get('/subcategories/:category_id', SubcategoryController.Subsector);
     apiRoutes.get('/countries', CountriesController.Countries);
     apiRoutes.get('/states', StatesController.States);
     apiRoutes.get('/categories', CategoryController.Categories);
@@ -315,7 +315,7 @@ module.exports = function (app) {
    //Admin Dashboard
     apiRoutes.post('/fetch-counts', AdminController.GetchCounts);
     apiRoutes.post('/daywise-counts', AdminController.DayWiseCounts);
-    apiRoutes.get('/subsector', SubsectorController.Subsector);
+    //apiRoutes.get('/subsector', SubsectorController.Subsector);
 
     
 
