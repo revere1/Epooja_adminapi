@@ -8,7 +8,7 @@ var async = require('async');
 //var app   = require('../app');
 exports.CreateCategories = function (request, response) {
     let postData = utils.DeepTrim(request.body);
-    models.categories.findOne({ where: { name: postData.name } }).then(categories => {
+    models.category.findOne({ where: { name: postData.name } }).then(categories => {
         let result = {};
         if (categories) {
             result.success = false;
@@ -16,7 +16,7 @@ exports.CreateCategories = function (request, response) {
             response.json(result);
         }
         else {
-            models.categories.create(postData).then(categories => {
+            models.category.create(postData).then(categories => {
                 if (categories) {
                     result.success = true;
                     result.message = 'Sector successfully created';
@@ -33,14 +33,14 @@ exports.CreateCategories = function (request, response) {
 
 //Get Categories values with database update 
 exports.GetCategories = (req, res) => {
-    models.categories.findOne({
+    models.category.findOne({
         where: { id: req.params.id }
     }).then(categories => {
         let response = {};
         if (categories) {
             response.success = true;
             response.data = {
-                'name': categories.name,
+                'name': category.category_name,
                 'status': categories.status,
                 'id': categories.id
             };
@@ -56,7 +56,7 @@ exports.GetCategories = (req, res) => {
 
 exports.UpdateCategory = function(request, response){
     let postData = utils.DeepTrim(request.body);
-    models.categories.findOne({ where: {id: postData.id}, required: false}).then(categories => {
+    models.category.findOne({ where: {id: postData.id}, required: false}).then(categories => {
             let result = {};
             if(categories){                                         
                     categories.updateAttributes(postData).then((updateCategory)=>{
@@ -96,8 +96,8 @@ exports.Categories = function (req, res, next) {
     where['status'] = 'active';
     if (utils.objLen(req.query)) Object.assign(where, req.query);
     // find categories
-    models.categories.findAll({
-        attributes: ['id', 'category'],
+    models.category.findAll({
+        attributes: ['id', 'category_name'],
         where: where
     }).then(function (categories) {
         if (!categories) {
@@ -146,14 +146,14 @@ filterCategories = (req, res ,cb)=>{
 
     async.parallel([
         (callback) => {
-            models.categories.findAll({where: where,attributes:['id']}).then(projects => {                    
+            models.category.findAll({where: where,attributes:['id']}).then(projects => {                    
                 callback(null,projects.length);
             }).catch(function (err) {
                 callback(err);
             });                
         },
         (callback) => {
-            models.categories.findAll({ where: where,
+            models.category.findAll({ where: where,
                 order: [
                     orderBy
                 ],
@@ -264,7 +264,7 @@ exports.DeleteCategory = function(request, response){
     // let id = request.params.id;
     let result = {};
     if(request.params.id != undefined){
-        models.categories.destroy({where: {id: request.params.id}}).then((rowDeleted)=>{
+        models.category.destroy({where: {id: request.params.id}}).then((rowDeleted)=>{
             result.success = true;
             result.message = (rowDeleted === 1) ? 'Category deleted successfully' : 'Unable to delete Category';
             response.json(result);
