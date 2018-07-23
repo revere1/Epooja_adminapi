@@ -7,8 +7,8 @@ var utils = require('./../helpers/utils');
 var async = require('async');
 
 
-//Get all tickers Method:GET
-exports.Tickers = function (request, response) {
+//Get all products Method:GET
+exports.Products = function (request, response) {
     let $where = {}, not_consider = ['token', 'pageIndex', 'pageSize', 'sortField', 'sortOrder'];
     Object.keys(request.body).forEach(function (item) {
         if (!inArray(item, not_consider) && (request.body[item] != '' && request.body[item] != null && request.body[item] != undefined)) {
@@ -27,7 +27,7 @@ exports.Tickers = function (request, response) {
     async.parallel(
         [
             (callback) => {
-                Ticker.findAll(condition).then(projects => {
+                Product.findAll(condition).then(projects => {
                     if ((projects.length === limit + 1)) {
                         json_res.itemsCount = offset + limit + 1;
                         projects.splice(-1, 1);
@@ -54,13 +54,13 @@ exports.Tickers = function (request, response) {
     )
 }
 
-exports.DeleteTicker = function (request, response) {
+exports.DeleteProduct = function (request, response) {
     let id = request.params.id;
     let result = {};
     if (request.params.id != undefined) {
-        models.tickers.destroy({ where: { 'id': id } }).then((rowDeleted) => {
+        models.products.destroy({ where: { 'id': id } }).then((rowDeleted) => {
             result.success = true;
-            result.message = (rowDeleted === 1) ? 'Ticker deleted successfully' : 'Unable to delete Ticker';
+            result.message = (rowDeleted === 1) ? 'Product deleted successfully' : 'Unable to delete Product';
             response.json(result);
         }, (err) => {
             result.success = false;
@@ -70,30 +70,30 @@ exports.DeleteTicker = function (request, response) {
     }
     else {
         result.success = false;
-        result.message = 'Not selected any Ticker';
+        result.message = 'Not selected any Product';
         response.json(result);
     }
 };
 
-exports.CreateTicker = function (request, response) {
+exports.CreateProduct = function (request, response) {
     let postData = request.body;
-    models.tickers.findOne({ where: { name: postData.name } }).then(ticker => {
+    models.products.findOne({ where: { product_name: postData.name } }).then(product => {
         let result = {};
-        if (ticker) {
+        if (product) {
             result.success = false;
-            result.message = 'Ticker already existed.';
+            result.message = 'Product already existed.';
             response.json(result);
         }
         else {
             trimPostData = utils.DeepTrim(postData)
-            models.tickers.create(trimPostData).then(ticker => {
-                if (ticker) {
+            models.products.create(trimPostData).then(product => {
+                if (product) {
                     result.success = true;
-                    result.message = 'Ticker successfully created';
+                    result.message = 'Product successfully created';
                 }
                 else {
                     result.success = true;
-                    result.message = 'Ticker Not  successfully created';
+                    result.message = 'Product Not  successfully created';
                 }
                 response.json(result);
             });
@@ -107,28 +107,21 @@ noResults = (result, response) => {
     response.json(result);
 }
 
-exports.GetTicker = (req, res) => {
-    models.tickers.findOne({
+exports.GetProduct= (req, res) => {
+    models.products.findOne({
         where: { id: req.params.id },
-    }).then(ticker => {
+    }).then(product => {
         let response = {};
-        if (ticker) {
+        if (product) {
             response.success = true;
             response.data = {
-                'name': ticker.name,
-                'company': ticker.company,
-                'industry': ticker.industry,
-                'sectorId': ticker.sectorId,
-                'countryId': ticker.countryId,
-                'company_url': ticker.company_url,
-                'listing_exchange':ticker.listing_exchange,
-                'currency': ticker.currency,
-                'market_cap': ticker.market_cap,
-                'share_in_issue': ticker.share_in_issue,
-                'fiftytwo_week_high': ticker.fiftytwo_week_high,
-                'fiftytwo_week_low': ticker.fiftytwo_week_low,
-                'avg_volume': ticker.avg_volume,
-                'id': ticker.id
+                'product_name': product.product_name,
+                'product_description':product.product_description,
+                'cost':product.cost,
+                'quatity':product.quatity,
+                'category_id': product.category_id,
+                'subcategoryId': product.subcategoryId,
+                'id': product.id
             };
         }
         else {
@@ -139,33 +132,33 @@ exports.GetTicker = (req, res) => {
     });
 }
 
-exports.Tickers = function (req, res, next) {
+exports.Products = function (req, res, next) {
     if (utils.objLen(req.query)) Object.assign(where, req.query);
-    models.tickers.findAll({
+    models.products.findAll({
         attributes: ['id', 'name'],
         where: where
-    }).then(function (tickers) {
-        if (!tickers) {
-            res.status(201).json({ success: false, message: 'Tickers Not Found.' });
-        } else if (tickers) {
+    }).then(function (products) {
+        if (!products) {
+            res.status(201).json({ success: false, message: 'Products Not Found.' });
+        } else if (products) {
             res.status(201).json({
                 success: true,
-                data: tickers
+                data: products
             });
         }
     });
 }
-exports.FilterTickers = (req, res) => {
-    filterTickers(req, res, (records) => {
+exports.FilterProducts = (req, res) => {
+    filterProducts(req, res, (records) => {
         return res.json(records);
     });
 }
 
-filterTickers = (req, res, cb) => {
-    models.tickers = models.tickers;
-    models.tickers.belongsTo(models.sectors);
-    models.tickers.belongsTo(models.countries);
-    models.tickers.belongsTo(models.users, { foreignKey: 'createdBy' });
+filterProducts = (req, res, cb) => {
+    models.products = models.products;
+    //models.products.belongsTo(models.sectors);
+    //models.products.belongsTo(models.countries);
+    //models.products.belongsTo(models.users, { foreignKey: 'createdBy' });
     pData = req.body;
     where = sort = {};
     if (pData.columns.length) {
@@ -186,15 +179,15 @@ filterTickers = (req, res, cb) => {
                 }
                 likeCond.push(item);
             });
-            likeCond.push(Sequelize.where(Sequelize.fn('concat', Sequelize.col(`user.first_name`), ' ', Sequelize.col(`user.last_name`)), {
-                like: '%' + pData.search.value + '%'
-            }));
-            likeCond.push(Sequelize.where(Sequelize.col(`country.name`), {
-                like: '%' + pData.search.value + '%'
-            }));
-            likeCond.push(Sequelize.where(Sequelize.col(`sector.name`), {
-                like: '%' + pData.search.value + '%'
-            }));
+            // likeCond.push(Sequelize.where(Sequelize.fn('concat', Sequelize.col(`user.first_name`), ' ', Sequelize.col(`user.last_name`)), {
+            //     like: '%' + pData.search.value + '%'
+            // }));
+            // likeCond.push(Sequelize.where(Sequelize.col(`country.name`), {
+            //     like: '%' + pData.search.value + '%'
+            // }));
+            // likeCond.push(Sequelize.where(Sequelize.col(`sector.name`), {
+            //     like: '%' + pData.search.value + '%'
+            // }));
             where = { [Op.or]: likeCond };
         }
     }
@@ -202,26 +195,26 @@ filterTickers = (req, res, cb) => {
 
     let options = {
         where: where,
-        attributes: ['id', 'name', 'company', 'industry', 'market_cap'],
+        attributes: ['id', 'product_name', 'product_description', 'cost', 'quatity'],
         include: [
-            {
-                model: models.sectors,
-                attributes: ['name']
-            },
-            {
-                model: models.countries,
-                attributes: ['name']
-            },
-            {
-                model: models.users,
-                attributes: [[Sequelize.literal('concat(`user`.`first_name`," ",`user`.`last_name`)'), 'Name']]
-            },
+            // {
+            //     model: models.sectors,
+            //     attributes: ['name']
+            // },
+            // {
+            //     model: models.countries,
+            //     attributes: ['name']
+            // },
+            // {
+            //     model: models.users,
+            //     attributes: [[Sequelize.literal('concat(`user`.`first_name`," ",`user`.`last_name`)'), 'Name']]
+            // },
         ],
         raw: true
     };
     async.parallel([
         (callback) => {
-            models.tickers.findAll(options).then(projects => {
+            models.products.findAll(options).then(projects => {
                 callback(null, projects.length);
             }).catch(function (err) {
                 callback(err);
@@ -229,8 +222,8 @@ filterTickers = (req, res, cb) => {
         },
         (callback) => {
             Object.assign(options, { order: [orderBy], limit: pData.length, offset: pData.start });
-            models.tickers.findAll(options).then(tickers => {
-                    callback(null, tickers);
+            models.products.findAll(options).then(products => {
+                    callback(null, products);
                 }).catch(function (err) {
                     callback(err);
                 });
@@ -254,9 +247,9 @@ filterTickers = (req, res, cb) => {
     })
 }
 
-exports.AutoSearchTickers = function (request, response) {
+exports.AutoSearchProducts = function (request, response) {
     let term = request.query.p;
-    models.tickers.findOne({
+    models.products.findOne({
         where: {
             name: {
                 $like: '%' + term + '%'
@@ -264,28 +257,28 @@ exports.AutoSearchTickers = function (request, response) {
         },
         attributes: ['id', ['name', 'sku']],
         required: false
-    }).then(tickers => {
+    }).then(products => {
         $result = [];
-        if (tickers) $result.push(tickers);
+        if (products) $result.push(products);
         response.json($result);
     }).catch(function (err) {
         response.json([]);
     });
 };
 
-exports.UpdateTicker = function (request, response) {
+exports.UpdateProduct = function (request, response) {
     let postData = request.body;
-    models.tickers.findOne({ where: { id: postData.id }, required: false }).then(tickers => {
+    models.products.findOne({ where: { id: postData.id }, required: false }).then(products => {
         let result = {};
-        if (tickers) {
+        if (products) {
             trimPostData = utils.DeepTrim(postData)
-            tickers.updateAttributes(trimPostData).then((updateTickers) => {
-                if (updateTickers) {
+            products.updateAttributes(trimPostData).then((updateProucts) => {
+                if (updateProducts) {
                     result.success = true;
-                    result.message = 'Ticker Updated successfully ';
+                    result.message = 'Product Updated successfully ';
                 } else {
                     result.success = true;
-                    result.message = 'Ticker not Updated successfully ';
+                    result.message = 'Product not Updated successfully ';
                 }
                 response.json(result);
             }).catch(Sequelize.ValidationError, function (err) {
@@ -304,7 +297,7 @@ exports.UpdateTicker = function (request, response) {
         }
         else {
             result.success = false;
-            result.message = 'Ticker not existed.';
+            result.message = 'Product not existed.';
             response.json(result);
         }
     });

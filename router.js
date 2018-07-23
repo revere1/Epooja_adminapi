@@ -1,12 +1,11 @@
 var UserController = require('./controllers/UserController');
-var TickerController = require('./controllers/TickerController');
+var ProductController = require('./controllers/ProductController');
 var CompanyController = require('./controllers/CompanyController');
 var SectorController = require('./controllers/SectorController');
 var SubsectorController = require('./controllers/SubsectorController');
 var CountriesController = require('./controllers/CountriesController');
 var StatesController = require('./controllers/StatesController');
 var AdminController = require('./controllers/AdminController');
-var MessagesController = require('./controllers/MessagesController');
 var LockerController = require('./controllers/LockerController');
 var HelpController = require('./controllers/HelpController');
 
@@ -15,9 +14,9 @@ var InsightController = require('./controllers/insights/InsightController');
 
 var EInsightsController = require('./controllers/elastic/EInsightsController');
 var EUserController = require('./controllers/elastic/EUserController');
-var NotificationsController = require('./controllers/NotificationsController');
+
 var DashboardController = require('./controllers/DashboardController');
-var MacroTypeController = require('./controllers/MacroTypeController');
+
 
 var express = require('express');
 var jwt = require('jsonwebtoken');
@@ -242,35 +241,14 @@ module.exports = function (app) {
     apiRoutes.delete('/editorier/:id', UserController.DeleteUser);
 
     
-    //Tickers
-    apiRoutes.post('/ticker', TickerController.CreateTicker);
-    apiRoutes.put('/ticker/:id', TickerController.UpdateTicker);
-    apiRoutes.get('/ticker/:id', TickerController.GetTicker);
-    apiRoutes.get('/tickers', TickerController.Tickers);
-    apiRoutes.post('/filterTickers', TickerController.FilterTickers);
-    apiRoutes.delete('/ticker/:id', TickerController.DeleteTicker);
-    apiRoutes.get('/auto-search-tickers', TickerController.AutoSearchTickers);
-
-
- 
-
-   //messages
-    apiRoutes.post('/messages', MessagesController.CreateMessage);
-    // apiRoutes.get('/usersall/:id', MessagesController.Users);
-    apiRoutes.post('/messages/path', MessagesController.Upload);
-    apiRoutes.post('/message/:id',MessagesController.GetMessage)
-    apiRoutes.post('/latestmessage/:id',MessagesController.LatestMessage)
-    apiRoutes.delete('/messages/remove-file', MessagesController.RemoveFile);
-    apiRoutes.post('/fetch-counts/:id', MessagesController.FetchCounts);
-    apiRoutes.get('/messageUser-list/:id', MessagesController.GetMessageUsersList);
-    apiRoutes.post('/reply/:id',MessagesController.createMessageReply);
-    apiRoutes.get('/auto-search-users', MessagesController.AutoSearchUsers);
-    //apiRoutes.get('/messagereply/:id',MessagesController.GetReplyMessage)
-    apiRoutes.post('/filter-messages', MessagesController.FilterMessages);
-    apiRoutes.post('/update-isRead/:id', MessagesController.UpdateIsRead);
-    apiRoutes.post('/messages/summernote-img', MessagesController.UploadImage);
-   //lockers
-
+    //Products
+    apiRoutes.post('/product', ProductController.CreateProduct);
+    apiRoutes.put('/product/:id', ProductController.UpdateProduct);
+    apiRoutes.get('/product/:id', ProductController.GetProduct);
+    apiRoutes.get('/products', ProductController.Products);
+    apiRoutes.post('/filterProducts', ProductController.FilterProducts);
+    apiRoutes.delete('/product/:id', ProductController.DeleteProduct);
+    apiRoutes.get('/auto-search-products', ProductController.AutoSearchProducts);
 
 
    //lockers
@@ -338,11 +316,7 @@ module.exports = function (app) {
     apiRoutes.get('/subsector', SubsectorController.Subsector);
 
     
-    //Notifications
-    apiRoutes.post('/create-notification',NotificationsController.CreateNotifications)
-    apiRoutes.post('/notifications-counts/:id',NotificationsController.FetchCounts);
-    apiRoutes.post('/filter-notifications', NotificationsController.FilterNotifications);
-    apiRoutes.post('/org-copy',NotificationsController.CreateOrgCopy)
+
   
     //Dashboard 
     apiRoutes.get('/trending-insights',DashboardController.TrendingInsights);
@@ -352,13 +326,6 @@ module.exports = function (app) {
     apiRoutes.post('/privillages',DashboardController.Privillagelist);
 
 
-    //Regions 
-    apiRoutes.post('/regionsOrcurrency',MacroTypeController.RegionsorCurrency);
-    apiRoutes.post('/regionOrcurrency',MacroTypeController.CreateRegionorCurrency);
-    apiRoutes.delete('/regionOrcurrency/:id/:tblName', MacroTypeController.DeleteRegionorCurrency);
-    apiRoutes.post('/regionOrcurrency/:id', MacroTypeController.GetRegionorCurrency);
-    apiRoutes.put('/regionOrcurrency/:id', MacroTypeController.UpdateRegionorCurrency);
-    apiRoutes.post('/filterRegions', MacroTypeController.FilterRegions);
-    apiRoutes.post('/filterCurrency', MacroTypeController.FilterCurrency);
+
     app.use('/v1', apiRoutes);
 };
