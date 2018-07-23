@@ -6,18 +6,18 @@ var utils = require('./../helpers/utils.js');
 const Op = Sequelize.Op;
 var async = require('async');
 //var app   = require('../app');
-exports.CreateSectors = function (request, response) {
+exports.CreateCategories = function (request, response) {
     let postData = utils.DeepTrim(request.body);
-    models.sectors.findOne({ where: { name: postData.name } }).then(sectors => {
+    models.categories.findOne({ where: { name: postData.name } }).then(categories => {
         let result = {};
-        if (sectors) {
+        if (categories) {
             result.success = false;
             result.message = 'sector already existed.';
             response.json(result);
         }
         else {
-            models.sectors.create(postData).then(sectors => {
-                if (sectors) {
+            models.categories.create(postData).then(categories => {
+                if (categories) {
                     result.success = true;
                     result.message = 'Sector successfully created';
                 }
@@ -31,41 +31,41 @@ exports.CreateSectors = function (request, response) {
     });
 };
 
-//Get Sectors values with database update 
-exports.GetSectors = (req, res) => {
-    models.sectors.findOne({
+//Get Categories values with database update 
+exports.GetCategories = (req, res) => {
+    models.categories.findOne({
         where: { id: req.params.id }
-    }).then(sectors => {
+    }).then(categories => {
         let response = {};
-        if (sectors) {
+        if (categories) {
             response.success = true;
             response.data = {
-                'name': sectors.name,
-                'status': sectors.status,
-                'id': sectors.id
+                'name': categories.name,
+                'status': categories.status,
+                'id': categories.id
             };
         }
         else {
             response.success = false;
-            response.message = 'No Sectors found';
+            response.message = 'No Categories found';
         }
         res.json(response);
     });
 }
 
 
-exports.UpdateSector = function(request, response){
+exports.UpdateCategory = function(request, response){
     let postData = utils.DeepTrim(request.body);
-    models.sectors.findOne({ where: {id: postData.id}, required: false}).then(sectors => {
+    models.categories.findOne({ where: {id: postData.id}, required: false}).then(categories => {
             let result = {};
-            if(sectors){                                         
-                    sectors.updateAttributes(postData).then((updateSector)=>{
-                            if(updateSector){
+            if(categories){                                         
+                    categories.updateAttributes(postData).then((updateCategory)=>{
+                            if(updateCategory){
                                     result.success = true;
-                                    result.message = 'Sector Updated successfully ';
+                                    result.message = 'Category Updated successfully ';
                             }else{
                                     result.success = true;
-                                    result.message = 'Sector not Updated successfully '; 
+                                    result.message = 'Category not Updated successfully '; 
                             }
                             response.json(result);     
                     }).catch(Sequelize.ValidationError, function (err) {
@@ -85,39 +85,39 @@ exports.UpdateSector = function(request, response){
             }
             else{
                     result.success = false;
-                    result.message = 'Sector not existed.';
+                    result.message = 'Category not existed.';
                     response.json(result);                     
             }             
     });     
 };
 
-exports.Sectors = function (req, res, next) {
+exports.Categories = function (req, res, next) {
     let where = {};
     where['status'] = 'active';
     if (utils.objLen(req.query)) Object.assign(where, req.query);
-    // find sectors
-    models.sectors.findAll({
-        attributes: ['id', 'name'],
+    // find categories
+    models.categories.findAll({
+        attributes: ['id', 'category'],
         where: where
-    }).then(function (sectors) {
-        if (!sectors) {
-            res.status(201).json({ success: false, message: 'Sectors Not Found.' });
-        } else if (sectors) {
+    }).then(function (categories) {
+        if (!categories) {
+            res.status(201).json({ success: false, message: 'Categories Not Found.' });
+        } else if (categories) {
             res.status(201).json({
                 success: true,
-                data: sectors
+                data: categories
             });
         }
     });
 }
 
-exports.FilterSectors = (req, res)=>{
-    filterSectors(req, res,(records)=>{
+exports.FilterCategories = (req, res)=>{
+    filterCategories(req, res,(records)=>{
             return res.json(records);
         });
 }
 
-filterSectors = (req, res ,cb)=>{
+filterCategories = (req, res ,cb)=>{
     pData = req.body;
     where = sort = {};
     if(pData.columns.length){       
@@ -146,20 +146,20 @@ filterSectors = (req, res ,cb)=>{
 
     async.parallel([
         (callback) => {
-            models.sectors.findAll({where: where,attributes:['id']}).then(projects => {                    
+            models.categories.findAll({where: where,attributes:['id']}).then(projects => {                    
                 callback(null,projects.length);
             }).catch(function (err) {
                 callback(err);
             });                
         },
         (callback) => {
-            models.sectors.findAll({ where: where,
+            models.categories.findAll({ where: where,
                 order: [
                     orderBy
                 ],
                 limit:pData.length, offset:pData.start})
-            .then(sectors => {
-                callback(null,sectors);
+            .then(categories => {
+                callback(null,categories);
             })
             .catch(function (err) {
                 callback(err);
@@ -260,23 +260,23 @@ filterContacts = (req, res ,cb)=>{
         cb(json_res);
     })
 };
-exports.DeleteSector = function(request, response){
+exports.DeleteCategory = function(request, response){
     // let id = request.params.id;
     let result = {};
     if(request.params.id != undefined){
-        models.sectors.destroy({where: {id: request.params.id}}).then((rowDeleted)=>{
+        models.categories.destroy({where: {id: request.params.id}}).then((rowDeleted)=>{
             result.success = true;
-            result.message = (rowDeleted === 1) ? 'Sector deleted successfully' : 'Unable to delete Sector';
+            result.message = (rowDeleted === 1) ? 'Category deleted successfully' : 'Unable to delete Category';
             response.json(result);
         },(err)=>{
             result.success = false;
-            result.message = 'you must delete SubSector in this Sector ';
+            result.message = 'you must delete SubCategory in this Category ';
             response.json(result);
         })
     }
     else{
         result.success = false;
-        result.message = 'Not selected any Sector';
+        result.message = 'Not selected any Category';
         response.json(result);
     }   
 };

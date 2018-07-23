@@ -1,7 +1,7 @@
 var UserController = require('./controllers/UserController');
 var TickerController = require('./controllers/TickerController');
 var CompanyController = require('./controllers/CompanyController');
-var SectorController = require('./controllers/SectorController');
+var CategoryController = require('./controllers/CategoryController');
 var SubsectorController = require('./controllers/SubsectorController');
 var CountriesController = require('./controllers/CountriesController');
 var StatesController = require('./controllers/StatesController');
@@ -284,14 +284,16 @@ module.exports = function (app) {
 
    //apiRoutes.get('/usersalllocker/:id', LockerController.Users);
 
-    //Sectors
-    apiRoutes.post('/sectors', SectorController.CreateSectors);
-    apiRoutes.put('/sectors/:id', SectorController.UpdateSector);
-    apiRoutes.get('/sectors/:id', SectorController.GetSectors);
-    apiRoutes.get('/sectors', SectorController.Sectors);
-    apiRoutes.delete('/sectors/:id', SectorController.DeleteSector);
-    apiRoutes.post('/filterSectors', SectorController.FilterSectors);
-    apiRoutes.post('/filterContacts', SectorController.FilterContacts);
+    //Categories
+    apiRoutes.post('/categories', CategoryController.CreateCategories);
+    apiRoutes.put('/categories/:id', CategoryController.UpdateCategory);
+    apiRoutes.get('/categories/:id', CategoryController.GetCategories);
+    apiRoutes.get('/categories', CategoryController.Categories);
+    apiRoutes.delete('/categories/:id', CategoryController.DeleteCategory);
+    apiRoutes.post('/filtercategories', CategoryController.FilterCategories);
+    apiRoutes.post('/filterContacts', CategoryController.FilterContacts);
+
+
     //Countries
     apiRoutes.post('/countries', CountriesController.Createcountries);
     apiRoutes.get('/countries/:id', CountriesController.GetCountry);
@@ -316,7 +318,7 @@ module.exports = function (app) {
     apiRoutes.get('/subsector/:sector_id', SubsectorController.Subsector);
     apiRoutes.get('/countries', CountriesController.Countries);
     apiRoutes.get('/states', StatesController.States);
-    apiRoutes.get('/sectors', SectorController.Sectors);
+    apiRoutes.get('/categories', CategoryController.Categories);
     
 
    //Problems

@@ -1,22 +1,22 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  var Sectors = sequelize.define('sectors', {
+  var Categories = sequelize.define('categories', {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
         isUnique: function (value, next) {
           var self = this;
-          Sectors.find({
+          Categories.find({
             where: { name: value },
             attributes: ['id']
-          }).done(function (sectors, error) {
+          }).done(function (categories, error) {
             if (error) {
               return next(error);
             }
-            else if (sectors) {
-              if(sectors && self.id !== sectors.id)
-              return next('Sector already in use!');
+            else if (categories) {
+              if(categories && self.id !== categories.id)
+              return next('Category already in use!');
             }
             next();
           });
@@ -29,18 +29,18 @@ module.exports = (sequelize, DataTypes) => {
   }, {
       classMethods: {
         associate: function (models) {
-          Sectors.belongsTo(models.users, {
-            foreignKey: 'createdBy',
+          Categories.belongsTo(models.users, {
+            foreignKey: 'created_on',
             onUpdate: 'CASCADE',
             onDelete: 'NO ACTION'
           });
-          Sectors.belongsTo(models.users, {
-            foreignKey: 'updatedBy',
+          Categories.belongsTo(models.users, {
+            foreignKey: 'updated_on',
             onUpdate: 'CASCADE',
             onDelete: 'NO ACTION'
           });
         }
       }
     });
-  return Sectors;
+  return Categories;
 };
