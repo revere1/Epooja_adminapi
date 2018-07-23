@@ -8,22 +8,22 @@ var async = require('async');
 //var app   = require('../app');
 exports.CreateCategories = function (request, response) {
     let postData = utils.DeepTrim(request.body);
-    models.category.findOne({ where: { name: postData.name } }).then(categories => {
+    models.category.findOne({ where: { category_name: postData.category_name } }).then(categories => {
         let result = {};
         if (categories) {
             result.success = false;
-            result.message = 'sector already existed.';
+            result.message = 'Category already existed.';
             response.json(result);
         }
         else {
             models.category.create(postData).then(categories => {
                 if (categories) {
                     result.success = true;
-                    result.message = 'Sector successfully created';
+                    result.message = 'Category successfully created';
                 }
                 else {
                     result.success = true;
-                    result.message = 'Sector not successfully created';
+                    result.message = 'Category not successfully created';
                 }
                 response.json(result);
             });
@@ -40,7 +40,9 @@ exports.GetCategories = (req, res) => {
         if (categories) {
             response.success = true;
             response.data = {
-                'name': category.category_name,
+                'category_name': categories.category_name,
+                'category_desc': categories.category_desc,
+                'path': categories.path,
                 'status': categories.status,
                 'id': categories.id
             };
