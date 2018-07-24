@@ -229,20 +229,7 @@ filterContacts = (req, res ,cb)=>{
                 callback(err);
             });                
         },
-        (callback) => {
-            models.contact_us.findAll({ where: where,
-                attributes:['id','name','mobile','email','comments'],
-                order: [
-                    orderBy
-                ],
-                limit:pData.length, offset:pData.start})
-            .then(contact_us => {
-                callback(null,contact_us);
-            })
-            .catch(function (err) {
-                callback(err);
-            });                        
-        }
+   
     ],(err,results) => {
             let json_res = {};
             json_res['draw'] = pData.draw;

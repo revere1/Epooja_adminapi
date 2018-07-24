@@ -5,7 +5,8 @@ var jwt = require('jsonwebtoken');
 var config = require('./../config/config.json')['system'];
 var utils = require('./../helpers/utils');
 var async = require('async');
-
+var multer = require('multer'); 
+var fs = require('fs');
 
 //Get all products Method:GET
 exports.Products = function (request, response) {
@@ -74,33 +75,47 @@ exports.DeleteProduct = function (request, response) {
         response.json(result);
     }
 };
-
-exports.CreateProduct = function (request, response) {
-    let postData = request.body;
-    models.products.findOne({ where: { product_name: postData.name } }).then(product => {
-        let result = {};
-        if (product) {
-            result.success = false;
-            result.message = 'Product already existed.';
-            response.json(result);
-        }
-        else {
-            trimPostData = utils.DeepTrim(postData)
-            models.products.create(trimPostData).then(product => {
-                if (product) {
-                    result.success = true;
-                    result.message = 'Product successfully created';
-                }
-                else {
-                    result.success = true;
-                    result.message = 'Product Not  successfully created';
-                }
-                response.json(result);
-            });
-        }
-    });
+var upload = multer({ storage : utils.assestDest('product_images') }).single('file');
+exports.CreateProduct = function(request, response){
+    let postData = request.body;   
+            let result = {};
+                    models.products.create(postData).then(products => {
+                        if(products){
+                            if(postData.files.length){
+                                let filesData = [];                              
+                                for(let file in postData.files){
+                                    var orgname = postData.files[file].split('-');
+                                    var mimetype = postData.files[file].split('.');
+            
+                                    filesData[file] = {'productId':products.id,'path':postData.files[file],'orgName':orgname[1],'mime_type':mimetype[mimetype.length-1]};
+                                }
+                             postData.productId = products.id;
+                           
+                            models.product_images.bulkCreate(filesData).then(function(test) {
+                                result.success = true;
+                                result.message = 'Lockers successfully created'; 
+                                return response.json(result);         
+                            }).catch(function(err){
+                                result.success = false;
+                                result.message = err.message; 
+                               return response.json(result);
+                            });
+                          }  
+                          else{
+                            result.success = true;
+                            result.message = 'Lockers successfully created'; 
+                            return response.json(result); 
+                          }                        
+                
+                        }
+                        else{                            
+                            noResults(result,response)
+                        }                        
+                    });
+                                            
+    //     }       
+    // }); 
 };
-
 noResults = (result, response) => {
     result.success = 'failure';
     result.message = 'Something went wrong';
@@ -135,7 +150,7 @@ exports.GetProduct= (req, res) => {
 exports.Products = function (req, res, next) {
     if (utils.objLen(req.query)) Object.assign(where, req.query);
     models.products.findAll({
-        attributes: ['id', 'name'],
+        attributes: ['id', 'product_name'],
         where: where
     }).then(function (products) {
         if (!products) {
@@ -148,6 +163,48 @@ exports.Products = function (req, res, next) {
         }
     });
 }
+
+
+exports.Upload = function (request,response){   
+    upload(request, response, function(err){         
+        let json_data = {};
+        json_data.success = false;
+        if(request.file){
+            json_data['success'] =  true;
+            json_data['data'] =  'product_images/'+request.file.filename; 
+            json_data['mimetype'] =  request.file.mimetype; 
+            json_data['name'] =  request.file.originalname;        
+        }
+        else{
+            json_data.message = err.message;            
+        }
+        response.json(json_data);        
+    });  
+}
+
+exports.RemoveFile = (req, res)=>{
+    result = {};
+    if(req.headers['file'] != undefined){
+        fs.unlink('uploads/'+req.headers['file'],(err)=>{
+            if(!err)
+            {
+                result.success = true;
+                result.message = 'Deleted Successfully';                
+            }
+            else{
+                result.success = false;
+                result.message = err.message;
+            }   
+            return res.json(result);
+
+        });     
+    }
+    else{
+        result.success = false;
+        result.message = 'Problem with your request';
+        return res.json(result);
+    }
+}
 exports.FilterProducts = (req, res) => {
     filterProducts(req, res, (records) => {
         return res.json(records);
@@ -156,8 +213,9 @@ exports.FilterProducts = (req, res) => {
 
 filterProducts = (req, res, cb) => {
     models.products = models.products;
-    //models.products.belongsTo(models.sectors);
-    //models.products.belongsTo(models.countries);
+    models.products.belongsTo(models.subcategory,{ foreignKey: 'subcategory_id' });
+    models.products.belongsTo(models.category,{ foreignKey: 'category_id' });
+    //models.products.belongsTo(models.product_images,{ foreignKey: 'id' });
     //models.products.belongsTo(models.users, { foreignKey: 'createdBy' });
     pData = req.body;
     where = sort = {};
@@ -182,12 +240,12 @@ filterProducts = (req, res, cb) => {
             // likeCond.push(Sequelize.where(Sequelize.fn('concat', Sequelize.col(`user.first_name`), ' ', Sequelize.col(`user.last_name`)), {
             //     like: '%' + pData.search.value + '%'
             // }));
-            // likeCond.push(Sequelize.where(Sequelize.col(`country.name`), {
-            //     like: '%' + pData.search.value + '%'
-            // }));
-            // likeCond.push(Sequelize.where(Sequelize.col(`sector.name`), {
-            //     like: '%' + pData.search.value + '%'
-            // }));
+            likeCond.push(Sequelize.where(Sequelize.col(`category.category_name`), {
+                like: '%' + pData.search.value + '%'
+            }));
+            likeCond.push(Sequelize.where(Sequelize.col(`subcategory.subcategory_name`), {
+                like: '%' + pData.search.value + '%'
+            }));
             where = { [Op.or]: likeCond };
         }
     }
@@ -197,14 +255,14 @@ filterProducts = (req, res, cb) => {
         where: where,
         attributes: ['id', 'product_name', 'product_description', 'cost', 'quatity'],
         include: [
-            // {
-            //     model: models.sectors,
-            //     attributes: ['name']
-            // },
-            // {
-            //     model: models.countries,
-            //     attributes: ['name']
-            // },
+            {
+                model: models.category,
+                attributes: ['category_name']
+            },
+            {
+                model: models.subcategory,
+                attributes: ['subcategory_name']
+            },
             // {
             //     model: models.users,
             //     attributes: [[Sequelize.literal('concat(`user`.`first_name`," ",`user`.`last_name`)'), 'Name']]

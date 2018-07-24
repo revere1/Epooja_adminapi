@@ -14,7 +14,7 @@ exports.Subcategory = function(req, res, next){
     if(utils.objLen(req.query))Object.assign(where,req.query);    
     // find subsector
     models.subcategory.findAll({
-        attributes: ['id', 'name'],
+        attributes: ['id', 'subcategory_name'],
         where: where
     }).then(function(subcategories) {
         if (!subcategories) {
@@ -187,6 +187,29 @@ filterSubCategory = (req, res ,cb)=>{
         cb(json_res);
     }) 
 };
+
+exports.SubCategories = function (req, res, next) {
+    let where = {};
+    where['status'] = 'active';
+    if (utils.objLen(req.query)) Object.assign(where, req.query);
+    // find categories
+    models.subcategory.findAll({
+        attributes: ['id', 'subcategory_name'],
+        where: where
+    }).then(function (categories) {
+        if (!categories) {
+            res.status(201).json({ success: false, message: 'Categories Not Found.' });
+        } else if (categories) {
+            res.status(201).json({
+                success: true,
+                data: categories
+            });
+        }
+    });
+}
+
+
+
 
 exports.DeleteSubCategory = function(request, response){
     // let id = request.params.id;
