@@ -83,8 +83,6 @@ exports.UpdateCategory = function(request, response){
                             }
                             response.json(result);     
                     }).catch(Sequelize.ValidationError, function (err) {
-                            // respond with validation errors
-                            
                             return response.status(200).json({
                                     success: false,
                                     message: err.message
