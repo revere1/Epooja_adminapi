@@ -213,7 +213,8 @@ module.exports = function (app) {
         apiRoutes.get('/auto-search-editoriers', UserController.AutoSearchEditorier);
         apiRoutes.post('/contact-us', UserController.CreateContactUs);
         apiRoutes.post('/role', UserController.GetRole);
-    //Middleware function to authentication
+   
+        //Middleware function to authentication
     apiRoutes.use(UserController.authenticate);
 
 
