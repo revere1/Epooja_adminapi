@@ -8,13 +8,10 @@ var StatesController = require('./controllers/StatesController');
 var AdminController = require('./controllers/AdminController');
 var LockerController = require('./controllers/LockerController');
 var HelpController = require('./controllers/HelpController');
-
 var CommodityController = require('./controllers/insights/CommodityController');
 var InsightController = require('./controllers/insights/InsightController');
-
 var EInsightsController = require('./controllers/elastic/EInsightsController');
 var EUserController = require('./controllers/elastic/EUserController');
-
 var DashboardController = require('./controllers/DashboardController');
 
 
@@ -129,7 +126,6 @@ module.exports = function (app) {
     /******END - Testing*****/
 
     apiRoutes.post('/filter-problems', HelpController.FilterProblems);
-
     apiRoutes.post('/login', UserController.Login);
     apiRoutes.post('/forgot-password', UserController.ForgotPwd);
     apiRoutes.post('/reset-password', UserController.ResetPwd);
@@ -214,8 +210,7 @@ module.exports = function (app) {
         apiRoutes.post('/contact-us', UserController.CreateContactUs);
         apiRoutes.post('/role', UserController.GetRole);
    
-        //Middleware function to authentication
-    apiRoutes.use(UserController.authenticate);
+    
 
 
 
@@ -272,6 +267,7 @@ module.exports = function (app) {
     apiRoutes.get('/categories', CategoryController.Categories);
     apiRoutes.delete('/categories/:id', CategoryController.DeleteCategory);
     apiRoutes.post('/filtercategories', CategoryController.FilterCategories);
+    apiRoutes.post('/categories/path', CategoryController.Upload);
     apiRoutes.post('/filterContacts', CategoryController.FilterContacts);
 
 
@@ -322,7 +318,8 @@ module.exports = function (app) {
     //apiRoutes.get('/subsector', SubsectorController.Subsector);
 
     
-
+    //Middleware function to authentication
+    apiRoutes.use(UserController.authenticate);
   
     //Dashboard 
     apiRoutes.get('/trending-insights',DashboardController.TrendingInsights);

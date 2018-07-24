@@ -1,11 +1,18 @@
-var models = require('../models');
+var models    = require('../models');
 var Sequelize = require('sequelize');
-var jwt    = require('jsonwebtoken');
-var config    = require('./../config/config.json')['system'];
-var utils = require('./../helpers/utils.js');
 const Op = Sequelize.Op;
+var jwt    = require('jsonwebtoken'); 
+var config    = require('./../config/config.json')['system'];
+var utils    = require('./../helpers/utils');
+var crypto = require('crypto');
+var multer = require('multer'); 
 var async = require('async');
+var md5  = require('md5');
+var fs = require('fs');
 //var app   = require('../app');
+
+var upload = multer({ storage : utils.assestDest('category_images') }).single('file');
+
 exports.CreateCategories = function (request, response) {
     let postData = utils.DeepTrim(request.body);
     models.category.findOne({ where: { category_name: postData.category_name } }).then(categories => {
@@ -37,6 +44,7 @@ exports.GetCategories = (req, res) => {
         where: { id: req.params.id }
     }).then(categories => {
         let response = {};
+        
         if (categories) {
             response.success = true;
             response.data = {
@@ -46,13 +54,17 @@ exports.GetCategories = (req, res) => {
                 'status': categories.status,
                 'id': categories.id
             };
+           
         }
         else {
             response.success = false;
             response.message = 'No Categories found';
         }
+       
         res.json(response);
+       
     });
+    
 }
 
 
@@ -112,7 +124,22 @@ exports.Categories = function (req, res, next) {
         }
     });
 }
-
+exports.Upload = function (request,response){   
+    upload(request, response, function(err){         
+        let json_data = {};
+        json_data.success = false;
+        if(request.file){
+            json_data['success'] =  true;
+            json_data['data'] =  'category_images/'+request.file.filename; 
+            json_data['mimetype'] =  request.file.mimetype; 
+            json_data['name'] =  request.file.originalname;        
+        }
+        else{
+            json_data.message = err.message;            
+        }
+        response.json(json_data);        
+    });  
+}
 exports.FilterCategories = (req, res)=>{
     filterCategories(req, res,(records)=>{
             return res.json(records);
