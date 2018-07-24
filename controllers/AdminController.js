@@ -53,16 +53,28 @@ exports.GetchCounts = (req, res) => {
         },
         (callback) => {
            
-                models.tickers.count().then(cnt => {
-                    let res = { 'tickers': cnt };
+                models.products.count().then(cnt => {
+                    let res = { 'products': cnt };
                     json_res['data'] = {...json_res['data'], ...res};
-                    callback(null, { 'tickers': cnt });
+                    callback(null, { 'products': cnt });
                 }).catch(function (err) {
                     callback(err);
                 });
            
 
-        }
+        },
+        (callback) => {
+           
+            models.category.count().then(cnt => {
+                let res = { 'categories': cnt };
+                json_res['data'] = {...json_res['data'], ...res};
+                callback(null, { 'categories': cnt });
+            }).catch(function (err) {
+                callback(err);
+            });
+       
+
+    }
     ], (err, results) => {
         
         if (err) {
