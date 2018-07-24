@@ -291,6 +291,7 @@ module.exports = function (app) {
    apiRoutes.delete('/subcategory/:id', SubcategoryController.DeleteSubCategory);
    apiRoutes.post('/filterSubCategory', SubcategoryController.FilterSubCategories);
    apiRoutes.get('/subcategories', SubcategoryController.Subcategory);
+   apiRoutes.post('/subcategories/path', SubcategoryController.Upload);
 
     //apiRoutes.get('/subcategories/:category_id', SubcategoryController.Subsector);
     apiRoutes.get('/countries', CountriesController.Countries);
