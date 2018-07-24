@@ -5,7 +5,7 @@ var jwt = require('jsonwebtoken');
 var config = require('./../config/config.json')['system'];
 var utils = require('./../helpers/utils');
 var async = require('async');
-
+var multer = require('multer'); 
 
 //Get all products Method:GET
 exports.Products = function (request, response) {
@@ -74,7 +74,7 @@ exports.DeleteProduct = function (request, response) {
         response.json(result);
     }
 };
-
+var upload = multer({ storage : utils.assestDest('product_images') }).single('file');
 exports.CreateProduct = function (request, response) {
     let postData = request.body;
     models.products.findOne({ where: { product_name: postData.name } }).then(product => {
@@ -147,6 +147,48 @@ exports.Products = function (req, res, next) {
             });
         }
     });
+}
+
+
+exports.Upload = function (request,response){   
+    upload(request, response, function(err){         
+        let json_data = {};
+        json_data.success = false;
+        if(request.file){
+            json_data['success'] =  true;
+            json_data['data'] =  'product_images/'+request.file.filename; 
+            json_data['mimetype'] =  request.file.mimetype; 
+            json_data['name'] =  request.file.originalname;        
+        }
+        else{
+            json_data.message = err.message;            
+        }
+        response.json(json_data);        
+    });  
+}
+
+exports.RemoveFile = (req, res)=>{
+    result = {};
+    if(req.headers['file'] != undefined){
+        fs.unlink('uploads/'+req.headers['file'],(err)=>{
+            if(!err)
+            {
+                result.success = true;
+                result.message = 'Deleted Successfully';                
+            }
+            else{
+                result.success = false;
+                result.message = err.message;
+            }   
+            return res.json(result);
+
+        });     
+    }
+    else{
+        result.success = false;
+        result.message = 'Problem with your request';
+        return res.json(result);
+    }
 }
 exports.FilterProducts = (req, res) => {
     filterProducts(req, res, (records) => {

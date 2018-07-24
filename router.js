@@ -246,6 +246,8 @@ module.exports = function (app) {
     apiRoutes.put('/product/:id', ProductController.UpdateProduct);
     apiRoutes.get('/product/:id', ProductController.GetProduct);
     apiRoutes.get('/products', ProductController.Products);
+    apiRoutes.post('/products/path', ProductController.Upload);
+    apiRoutes.delete('/products/remove-file', ProductController.RemoveFile);
     apiRoutes.post('/filterProducts', ProductController.FilterProducts);
     apiRoutes.delete('/product/:id', ProductController.DeleteProduct);
     apiRoutes.get('/auto-search-products', ProductController.AutoSearchProducts);
