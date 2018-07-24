@@ -168,29 +168,29 @@ exports.Upload = function (request,response){
     });  
 }
 
-exports.RemoveFile = (req, res)=>{
-    result = {};
-    if(req.headers['file'] != undefined){
-        fs.unlink('uploads/'+req.headers['file'],(err)=>{
-            if(!err)
-            {
-                result.success = true;
-                result.message = 'Deleted Successfully';                
-            }
-            else{
-                result.success = false;
-                result.message = err.message;
-            }   
-            return res.json(result);
+// exports.RemoveFile = (req, res)=>{
+//     result = {};
+//     if(req.headers['file'] != undefined){
+//         fs.unlink('uploads/'+req.headers['file'],(err)=>{
+//             if(!err)
+//             {
+//                 result.success = true;
+//                 result.message = 'Deleted Successfully';                
+//             }
+//             else{
+//                 result.success = false;
+//                 result.message = err.message;
+//             }   
+//             return res.json(result);
 
-        });     
-    }
-    else{
-        result.success = false;
-        result.message = 'Problem with your request';
-        return res.json(result);
-    }
-}
+//         });     
+//     }
+//     else{
+//         result.success = false;
+//         result.message = 'Problem with your request';
+//         return res.json(result);
+//     }
+// }
 exports.FilterProducts = (req, res) => {
     filterProducts(req, res, (records) => {
         return res.json(records);
