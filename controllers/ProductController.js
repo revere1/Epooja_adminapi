@@ -122,6 +122,7 @@ exports.GetProduct= (req, res) => {
                 'quatity':product.quatity,
                 'category_id': product.category_id,
                 'subcategory_id': product.subcategory_id,
+                'status':product.status,
                 'id': product.id
             };
         }
@@ -234,7 +235,7 @@ filterProducts = (req, res, cb) => {
 
     let options = {
         where: where,
-        attributes: ['id', 'product_name', 'product_description', 'path','cost', 'quatity'],
+        attributes: ['id', 'product_name', 'product_description', 'path','cost', 'quatity','status'],
         include: [
             {
                 model: models.category,
