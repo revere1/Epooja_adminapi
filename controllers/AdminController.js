@@ -74,7 +74,19 @@ exports.GetchCounts = (req, res) => {
             });
        
 
-    }
+    },
+    (callback) => {
+           
+        models.subcategory.count().then(cnt => {
+            let res = { 'subcategories': cnt };
+            json_res['data'] = {...json_res['data'], ...res};
+            callback(null, { 'subcategories': cnt });
+        }).catch(function (err) {
+            callback(err);
+        });
+   
+
+}
     ], (err, results) => {
         
         if (err) {
