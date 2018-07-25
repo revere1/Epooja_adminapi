@@ -140,7 +140,8 @@ exports.Upload = function (request,response){
     });  
 }
 filterSubCategory = (req, res ,cb)=>{
-    //models.subcategory.belongsTo(models.category,{ foreignKey: 'category_id' });
+    models.subcategory = models.subcategory;
+    models.subcategory.belongsTo(models.category,{ foreignKey: 'category_id' });
     pData = req.body;
     where = sort = {};
     if(pData.columns.length){       
@@ -161,45 +162,40 @@ filterSubCategory = (req, res ,cb)=>{
                     }   
                 likeCond.push(item);
             });
-            // likeCond.push(Sequelize.where(Sequelize.col(`category.category_name`), {
-            //     like: '%' + pData.search.value + '%'
-            // }));
+            likeCond.push(Sequelize.where(Sequelize.col(`category.category_name`), {
+                like: '%' + pData.search.value + '%'
+            }));
             where = {[Op.or] : likeCond};
         }      
     }
    
     let orderBy = [pData.columns[pData.order[0].column].data , pData.order[0].dir];
-    // let options = {
-    //     where: where,
-    //     attributes: ['id', 'subcategory_name', 'subcategory_desc'],
-    //     include: [
-    //         {
-    //             model: models.category,
-    //             attributes: ['category_name']
-    //         },
-    //     ],
-    //     raw: true
-    // };
+    let options = {
+        where: where,
+        attributes: ['id', 'subcategory_name', 'subcategory_desc','path','status','createdAt'],
+        include: [
+            {
+                model: models.category,
+                attributes: ['category_name']
+            },
+        ],
+        raw: true
+    };
     async.parallel([
         (callback) => {
-            models.subcategory.findAll({where: where,attributes:['id']}).then(projects => {                    
-                callback(null,projects.length);
+            models.subcategory.findAll(options).then(projects => {
+                callback(null, projects.length);
             }).catch(function (err) {
                 callback(err);
-            });                
+            });
         },
         (callback) => {
-            models.subcategory.findAll({ where: where,
-                order: [
-                    orderBy
-                ],
-                limit:pData.length, offset:pData.start})
-            .then(subcategories => {
-                callback(null,subcategories);
-            })
-            .catch(function (err) {
-                callback(err);
-            });                        
+            Object.assign(options, { order: [orderBy], limit: pData.length, offset: pData.start });
+            models.subcategory.findAll(options).then(products => {
+                    callback(null, products);
+                }).catch(function (err) {
+                    callback(err);
+                });
         }
     ],(err,results) => {
             let json_res = {};
