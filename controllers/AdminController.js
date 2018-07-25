@@ -53,7 +53,7 @@ exports.GetchCounts = (req, res) => {
         },
         (callback) => {
            
-                models.products.count().then(cnt => {
+                models.products.count({ where: { status: 'active'} }).then(cnt => {
                     let res = { 'products': cnt };
                     json_res['data'] = {...json_res['data'], ...res};
                     callback(null, { 'products': cnt });
@@ -65,7 +65,7 @@ exports.GetchCounts = (req, res) => {
         },
         (callback) => {
            
-            models.category.count().then(cnt => {
+            models.category.count({ where: { status: 'active'} }).then(cnt => {
                 let res = { 'categories': cnt };
                 json_res['data'] = {...json_res['data'], ...res};
                 callback(null, { 'categories': cnt });
@@ -77,7 +77,7 @@ exports.GetchCounts = (req, res) => {
     },
     (callback) => {
            
-        models.subcategory.count().then(cnt => {
+        models.subcategory.count({ where: { status: 'active'} }).then(cnt => {
             let res = { 'subcategories': cnt };
             json_res['data'] = {...json_res['data'], ...res};
             callback(null, { 'subcategories': cnt });
