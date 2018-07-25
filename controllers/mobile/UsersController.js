@@ -12,8 +12,8 @@ var fs = require('fs');
 var db = require('./../../models/index');
 exports.Register = (req,res)=>
 {
-    // let postData = JSON.parse(req.body.data);
-    // console.log(JSON.parse(req.body.data));
+    let postData = JSON.parse(req.body);
+    console.log(postData);
     res.json({'status':true,'message':'Register Success'});
 };
 
