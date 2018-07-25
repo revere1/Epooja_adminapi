@@ -121,7 +121,7 @@ exports.GetProduct= (req, res) => {
                 'cost':product.cost,
                 'quatity':product.quatity,
                 'category_id': product.category_id,
-                'subcategoryId': product.subcategoryId,
+                'subcategory_id': product.subcategory_id,
                 'id': product.id
             };
         }
@@ -307,7 +307,7 @@ exports.UpdateProduct = function (request, response) {
         let result = {};
         if (products) {
             trimPostData = utils.DeepTrim(postData)
-            products.updateAttributes(trimPostData).then((updateProucts) => {
+            products.updateAttributes(trimPostData).then((updateProducts) => {
                 if (updateProducts) {
                     result.success = true;
                     result.message = 'Product Updated successfully ';
