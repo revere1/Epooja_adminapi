@@ -76,45 +76,30 @@ exports.DeleteProduct = function (request, response) {
     }
 };
 var upload = multer({ storage : utils.assestDest('product_images') }).single('file');
-exports.CreateProduct = function(request, response){
-    let postData = request.body;   
-            let result = {};
-                    models.products.create(postData).then(products => {
-                        if(products){
-                            if(postData.files.length){
-                                let filesData = [];                              
-                                for(let file in postData.files){
-                                    var orgname = postData.files[file].split('-');
-                                    var mimetype = postData.files[file].split('.');
-            
-                                    filesData[file] = {'productId':products.id,'path':postData.files[file],'orgName':orgname[1],'mime_type':mimetype[mimetype.length-1]};
-                                }
-                             postData.productId = products.id;
-                           
-                            models.product_images.bulkCreate(filesData).then(function(test) {
-                                result.success = true;
-                                result.message = 'Lockers successfully created'; 
-                                return response.json(result);         
-                            }).catch(function(err){
-                                result.success = false;
-                                result.message = err.message; 
-                               return response.json(result);
-                            });
-                          }  
-                          else{
-                            result.success = true;
-                            result.message = 'Lockers successfully created'; 
-                            return response.json(result); 
-                          }                        
-                
-                        }
-                        else{                            
-                            noResults(result,response)
-                        }                        
-                    });
-                                            
-    //     }       
-    // }); 
+
+exports.CreateProduct = function (request, response) {
+    let postData = utils.DeepTrim(request.body);
+    models.products.findOne({ where: { product_name: postData.product_name } }).then(products => {
+        let result = {};
+        if (products) {
+            result.success = false;
+            result.message = 'Product already existed.';
+            response.json(result);
+        }
+        else {
+            models.products.create(postData).then(products => {
+                if (products) {
+                    result.success = true;
+                    result.message = 'Product successfully created';
+                }
+                else {
+                    result.success = true;
+                    result.message = 'Product not successfully created';
+                }
+                response.json(result);
+            });
+        }
+    });
 };
 noResults = (result, response) => {
     result.success = 'failure';
@@ -132,10 +117,11 @@ exports.GetProduct= (req, res) => {
             response.data = {
                 'product_name': product.product_name,
                 'product_description':product.product_description,
+                'path':product.path,
                 'cost':product.cost,
                 'quatity':product.quatity,
                 'category_id': product.category_id,
-                'subcategoryId': product.subcategoryId,
+                'subcategory_id': product.subcategory_id,
                 'id': product.id
             };
         }
@@ -182,29 +168,29 @@ exports.Upload = function (request,response){
     });  
 }
 
-exports.RemoveFile = (req, res)=>{
-    result = {};
-    if(req.headers['file'] != undefined){
-        fs.unlink('uploads/'+req.headers['file'],(err)=>{
-            if(!err)
-            {
-                result.success = true;
-                result.message = 'Deleted Successfully';                
-            }
-            else{
-                result.success = false;
-                result.message = err.message;
-            }   
-            return res.json(result);
+// exports.RemoveFile = (req, res)=>{
+//     result = {};
+//     if(req.headers['file'] != undefined){
+//         fs.unlink('uploads/'+req.headers['file'],(err)=>{
+//             if(!err)
+//             {
+//                 result.success = true;
+//                 result.message = 'Deleted Successfully';                
+//             }
+//             else{
+//                 result.success = false;
+//                 result.message = err.message;
+//             }   
+//             return res.json(result);
 
-        });     
-    }
-    else{
-        result.success = false;
-        result.message = 'Problem with your request';
-        return res.json(result);
-    }
-}
+//         });     
+//     }
+//     else{
+//         result.success = false;
+//         result.message = 'Problem with your request';
+//         return res.json(result);
+//     }
+// }
 exports.FilterProducts = (req, res) => {
     filterProducts(req, res, (records) => {
         return res.json(records);
@@ -215,8 +201,6 @@ filterProducts = (req, res, cb) => {
     models.products = models.products;
     models.products.belongsTo(models.subcategory,{ foreignKey: 'subcategory_id' });
     models.products.belongsTo(models.category,{ foreignKey: 'category_id' });
-    //models.products.belongsTo(models.product_images,{ foreignKey: 'id' });
-    //models.products.belongsTo(models.users, { foreignKey: 'createdBy' });
     pData = req.body;
     where = sort = {};
     if (pData.columns.length) {
@@ -237,9 +221,6 @@ filterProducts = (req, res, cb) => {
                 }
                 likeCond.push(item);
             });
-            // likeCond.push(Sequelize.where(Sequelize.fn('concat', Sequelize.col(`user.first_name`), ' ', Sequelize.col(`user.last_name`)), {
-            //     like: '%' + pData.search.value + '%'
-            // }));
             likeCond.push(Sequelize.where(Sequelize.col(`category.category_name`), {
                 like: '%' + pData.search.value + '%'
             }));
@@ -253,7 +234,7 @@ filterProducts = (req, res, cb) => {
 
     let options = {
         where: where,
-        attributes: ['id', 'product_name', 'product_description', 'cost', 'quatity'],
+        attributes: ['id', 'product_name', 'product_description', 'path','cost', 'quatity'],
         include: [
             {
                 model: models.category,
@@ -263,10 +244,6 @@ filterProducts = (req, res, cb) => {
                 model: models.subcategory,
                 attributes: ['subcategory_name']
             },
-            // {
-            //     model: models.users,
-            //     attributes: [[Sequelize.literal('concat(`user`.`first_name`," ",`user`.`last_name`)'), 'Name']]
-            // },
         ],
         raw: true
     };
@@ -330,7 +307,7 @@ exports.UpdateProduct = function (request, response) {
         let result = {};
         if (products) {
             trimPostData = utils.DeepTrim(postData)
-            products.updateAttributes(trimPostData).then((updateProucts) => {
+            products.updateAttributes(trimPostData).then((updateProducts) => {
                 if (updateProducts) {
                     result.success = true;
                     result.message = 'Product Updated successfully ';
