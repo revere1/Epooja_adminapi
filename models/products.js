@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     path: DataTypes.STRING,
     cost: DataTypes.STRING,
     quatity: DataTypes.STRING,
+    status: DataTypes.STRING
   },  {
     classMethods: {
       associate: function(models) {
