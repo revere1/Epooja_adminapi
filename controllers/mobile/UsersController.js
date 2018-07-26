@@ -10,16 +10,101 @@ var async = require('async');
 var md5 = require('md5');
 var fs = require('fs');
 var db = require('./../../models/index');
+
+
 exports.Register = (req,res)=>
 {
-    let postData = JSON.parse(req.body);
-    console.log(postData);
-    res.json({'status':true,'message':'Register Success'});
+    let postData = req.body;
+
+    models.mobile_users.findOne({ where: { user_email: postData.user_email} }).then(mobile_user => {
+        let result = {};
+        if (mobile_user) {
+            result.success = false;
+            result.message = 'User already existed.';
+            res.json(result);
+        }
+        else {
+            postData = utils.DeepTrim(postData);
+            models.mobile_users.create(postData).then(user1 => {
+                if (user1){                              
+                        result.success = true;
+                        result.message = 'User successfully created';
+                        res.json(result);
+                }
+                else{
+                    noResults(result, res)
+                }
+            }).catch(function (err) {
+                result.success = false;
+                errs = [];
+                (err.errors).forEach(er => {           
+                   errs.push(er.message);     
+                });
+                result.message = errs.join(',');
+                res.json(result);
+              });
+        }
+    });    
 };
 
-exports.Login = (req,res)=>{
-    res.json({'status':true,'message':'Login Success'});
-    };
+
+
+exports.Login = (req,res)=>
+{
+    if(req.body.user_name != '' && req.body.password != '')
+    {
+
+    
+    let postData = req.body;
+    models.mobile_users.findOne({
+        where: {
+            user_email: postData.user_name
+        }        
+    }).then(function (user) {
+        if (!user) {
+            res.status(201).json({ success: false, message: 'Incorrect login credentials.' });
+        } else if (user) {
+            
+            if (user._modelOptions.instanceMethods.validPassword(req.body.password, user)) {
+
+                var token = jwt.sign(user.toJSON(), config.jwt_app_secretkey, {
+                    expiresIn: config.jwt_app_expire
+                });
+                res.status(201).json({
+                    success: true,
+                    data: {
+                        'userid': user.id,
+                        'email': user.user_email,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'status': user.status,
+                        'registerdAt': user.createdAt,
+                        'profile_pic':''
+                    },
+                    token: token
+                });
+            }
+            else {
+                res.status(201).json({ success: false, message: 'Incorrect login credentials.' });
+            }
+        }
+    }).catch(function (err) {
+        // let result = {};
+        // result.success = false;
+        // errs = [];
+        // (err.errors).forEach(er => {           
+        //    errs.push(er.message);     
+        // });
+        // result.message = errs.join(',');
+        res.json(err);
+      });
+    }else{
+        res.status(201).json({ success: false, message: 'Username/Password should not be empty' });
+    }
+    
+};
+
+
 
 
 exports.authenticate = function (req, res, next) {
@@ -67,3 +152,8 @@ exports.VerifyApiCode = function(req, res, next)
     }    
 };
 
+noResults = (result, response) => {
+    result.success = 'failure';
+    result.message = 'Something went wrong';
+    response.json(result);
+}

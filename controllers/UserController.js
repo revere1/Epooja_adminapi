@@ -119,9 +119,10 @@ exports.checkuserlevel = function (req, res, next) {
 exports.Users = function (request, response) {
     let $where = {}, not_consider = ['token', 'pageIndex', 'pageSize', 'sortField', 'sortOrder'];
     Object.keys(request.body).forEach(function (item) {
-        if (!inArray(item, not_consider) && (request.body[item] != '' && request.body[item] != null && request.body[item] != undefined)) {
-            $where[item] = { $like: '%' + request.body[item] + '%' }
-        }
+        console.log(item);
+        // if (!utils.inArray(item, not_consider) && (request.body[item] != '' && request.body[item] != null && request.body[item] != undefined)) {
+        //     $where[item] = { $like: '%' + request.body[item] + '%' }
+        // }
     }, this);
 
     let condition = { where: $where };
@@ -143,7 +144,7 @@ exports.Users = function (request, response) {
             //     });                
             // },
             (callback) => {
-                models.users.findAll(condition).then(projects => {
+                models.mobile_users.findAll(condition).then(projects => {
 
                     if ((projects.length === limit + 1)) {
                         json_res.itemsCount = offset + limit + 1;

@@ -1,28 +1,21 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('mobile_users', {
+    return queryInterface.createTable('product_reviews', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      user_name: {
-        type: Sequelize.STRING
-      },
-      password: {
-        type: Sequelize.STRING
-      },
-      
-      user_email: {
-        type: Sequelize.STRING
-      },
-      user_mobile: {
+      pid: {
         type: Sequelize.INTEGER
       },
-      user_image: {
-        type: Sequelize.STRING
+      uid: {
+        type: Sequelize.INTEGER
+      },
+      review: {
+        type: Sequelize.TEXT
       },
       status: {
         type: Sequelize.INTEGER
@@ -38,6 +31,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('mobile_users');
+    return queryInterface.dropTable('product_reviews');
   }
 };

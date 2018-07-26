@@ -270,6 +270,8 @@ module.exports = function (app) {
     apiRoutes.post('/categories/path', CategoryController.Upload);
     apiRoutes.post('/filterContacts', CategoryController.FilterContacts);
 
+    // Mobile Users
+    apiRoutes.post('/mobile-users', UserController.Users);
 
     //Countries
     apiRoutes.post('/countries', CountriesController.Createcountries);
@@ -328,6 +330,9 @@ module.exports = function (app) {
     apiRoutes.get('/research-insights',DashboardController.ResearchInsights);
     apiRoutes.post('/watch-list',DashboardController.MyWatchlist);
     apiRoutes.post('/privillages',DashboardController.Privillagelist);
+
+    
+
 
 
 

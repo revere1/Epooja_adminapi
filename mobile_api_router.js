@@ -1,4 +1,6 @@
 var MUsersController = require('./controllers/mobile/UsersController');
+var MProductsController = require('./controllers/mobile/ProductsController');
+
 var express = require('express');
 
 
@@ -6,6 +8,12 @@ module.exports = function (app) {
     var apiRoutes = express.Router();
     apiRoutes.post('/login',MUsersController.VerifyApiCode,MUsersController.Login);
     apiRoutes.post('/register',MUsersController.VerifyApiCode,MUsersController.Register);
+
+    apiRoutes.get('/categories',MUsersController.authenticate,MProductsController.GetCategories);
+    apiRoutes.get('/subcategories/:cat_id',MUsersController.authenticate,MProductsController.GetSubCategories);
+    apiRoutes.get('/products/:cat_id/:scat_id',MUsersController.authenticate,MProductsController.GetProducts);
+    apiRoutes.get('/product/:pid',MUsersController.authenticate,MProductsController.GetProductDetails);    
+      
     app.use('/app', apiRoutes);
 
     // MUsersController.authenticate,
