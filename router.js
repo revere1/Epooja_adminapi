@@ -195,10 +195,14 @@ module.exports = function (app) {
          
         //Users
         apiRoutes.post('/user', UserController.CreateUser);
+        apiRoutes.post('/filterUsers', UserController.FilterMUsers);
+        apiRoutes.get('/user/:id', UserController.GetUser);
+        apiRoutes.put('/user/:id', UserController.UpdateUser);
+
         apiRoutes.post('/privillage', UserController.CreatePrivillage);
         apiRoutes.get('/privillage/:id', UserController.GetPrivillages);
-        apiRoutes.put('/user/:id', UserController.UpdateUser);
-        apiRoutes.get('/user/:id', UserController.GetUser);
+        
+        
         apiRoutes.get('/users', UserController.Users);
         apiRoutes.get('/users/:companyId', UserController.UsersByCompany);
         apiRoutes.post('/filterClients', UserController.FilterClients);

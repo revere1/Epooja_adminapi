@@ -9,9 +9,9 @@ var db = require('./../../models/index');
 
 exports.GetCategories = (req,res)=>
 {
-    models.categories.findOne({
+    models.category.findAll({
         where: {
-            status: 1
+            status: 'active'
         }        
     }).then(function (categories) {
         if (!categories) {
@@ -30,8 +30,8 @@ exports.GetSubCategories = (req,res)=>
     models.subcategories.findOne({
         where: {
             $and : [
-                    {category_id: req.body.cat_id},
-                    {status: 1}
+                    {category_id: req.params.cat_id},
+                    {status: 'active'}
                 ]            
         }        
     }).then(function (subcategories) {
@@ -46,14 +46,35 @@ exports.GetSubCategories = (req,res)=>
     });
 }
 
-exports.GetProducts = (req,res)=>
+exports.GetProductsByCat = (req,res)=>
 {
-    models.products.findOne({
+   models.products.findAll({
         where: {
             $and : [
-                    {category_id: req.body.cat_id},
-                    {subcategory_id: req.body.scat_id},
-                    {status: 1}
+                    {category_id: req.params.cat_id},                   
+                    {status: 'active'}
+                ]            
+        }        
+    }).then(function (products) {
+    
+        if (!products) {
+            res.status(201).json({ success: false, message: 'No products available' });
+        } else if (products) {
+            res.status(201).json({
+                success: true,
+                data: products
+            });
+        }
+    });
+}
+exports.GetProductsBySubCat = (req,res)=>
+{
+    models.products.findAll({
+        where: {
+            $and : [
+                    {category_id: req.params.cat_id},
+                    {subcategory_id: req.params.scat_id},
+                    {status: 'active'}
                 ]            
         }        
     }).then(function (products) {
@@ -72,7 +93,7 @@ exports.GetProductDetails = (req,res)=>
     models.products.findOne({
         where: {
             $and : [
-                    {id: req.body.pid},
+                    {id: req.params.pid},
                     {status: 1}
                 ]            
         }        

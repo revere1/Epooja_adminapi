@@ -11,7 +11,8 @@ module.exports = function (app) {
 
     apiRoutes.get('/categories',MUsersController.authenticate,MProductsController.GetCategories);
     apiRoutes.get('/subcategories/:cat_id',MUsersController.authenticate,MProductsController.GetSubCategories);
-    apiRoutes.get('/products/:cat_id/:scat_id',MUsersController.authenticate,MProductsController.GetProducts);
+    apiRoutes.get('/products/:cat_id',MUsersController.authenticate,MProductsController.GetProductsByCat);
+    apiRoutes.get('/products/:cat_id/:scat_id',MUsersController.authenticate,MProductsController.GetProductsBySubCat);
     apiRoutes.get('/product/:pid',MUsersController.authenticate,MProductsController.GetProductDetails);    
       
     app.use('/app', apiRoutes);

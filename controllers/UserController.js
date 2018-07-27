@@ -364,62 +364,120 @@ exports.GetPrivillages = (req, res) => {
 
 
 exports.CreateUser = function (request, response) {
-    //return response.json(request.body);
-    compUpload(request, response, function (err) {
-        // return response.json(request.body);
-        let postData = JSON.parse(request.body.data);
+    
+    
+        let postData = request.body;
 
         delete postData.id;
-        models.users.findOne({ where: { email: postData.email } }).then(user => {
+        models.mobile_users.findOne({ where: { user_email: postData.user_email } }).then(muser => {
 
             let result = {};
-            if (user) {
+            if (muser) {
                 result.success = false;
                 result.message = 'User already existed.';
                 response.json(result);
             }
-            else {
-                getAccessLevel(postData.access_level, access_level => {
-                    if (!access_level) {
-                        noResults(result, response);
-                    }
-                    else {
+            else 
+            {
 
-                        if (postData.password !== null) {
-                            postData.password_hash = models.users.generateHash(postData.password);
-                        }
+                if (postData.password !== null && (postData.length < 6 || postData.length >20)) {
+                    result.success = false;
+                    result.message = 'Password should be between 6,20 characters';
+                    response.json(result);
+                }
 
-                        postData.access_level = access_level.id;
-                        if (request.file !== undefined)
-                            postData.company_logo = 'analyst_comp_logo/' + request.file.filename;
-
-                        postData = utils.DeepTrim(postData)
-                        models.users.create(postData).then(user1 => {
-                            if (user1) {
-                                postData.userId = user1.id;
-                                createUserProfile(postData, userProfile => {
-                                    if (userProfile) {
-                                        result.success = true;
-                                        result.message = 'User successfully created';
-                                    }
-                                    else {
-                                        result.success = true;
-                                        result.message = 'User successfully created';
-                                        result.message2 = 'User Profile Not created';
-                                    }
-                                    response.json(result);
-                                });
-                            }
-                            else {
-                                noResults(result, response)
-                            }
-                        });
-                    }
-                });
-            }
-        });
-    });
+                postData = utils.DeepTrim(postData)
+                models.mobile_users.create(postData).then(muser1 => {
+                 if (muser1)
+                 {
+                    postData.userId = muser1.id;
+                    result.success = true;
+                    result.message = 'User successfully created';
+                    response.json(result);
+                               
+                 }
+                else
+                {
+                    noResults(result, response)
+                }
+            });
+          }
+            
+        });    
 };
+exports.FilterMUsers = (req, res)=>{
+    filterMUsers(req, res,(records)=>{
+            return res.json(records);
+        });
+}
+filterMUsers = (req, res ,cb)=>{
+    pData = req.body;
+    where = sort = {};
+    if(pData.columns.length){       
+        (pData.columns).forEach(col => {           
+            if((col.search.value).length){
+                let cond = {};
+                cond[col.data] = col.search.value;
+                Object.assign(where,cond);
+            }          
+        });
+        if((pData.search.value).length){
+            let likeCond = [];
+            (pData.columns).forEach(col => {
+                let item = {
+                        [col.data] : {
+                            [Op.like] : `%${pData.search.value}%`
+                        }
+                    }   
+                likeCond.push(item);
+            });
+            where = {[Op.or] : likeCond};
+        }      
+    }
+   
+    let orderBy = [pData.columns[pData.order[0].column].data , pData.order[0].dir];
+
+    async.parallel([
+        (callback) => {
+            models.mobile_users.findAll({where: where,attributes:['id']}).then(musers => {                    
+                callback(null,musers.length);
+            }).catch(function (err) {
+                callback(err);
+            });                
+        },
+        (callback) => {
+            models.mobile_users.findAll({ where: where,
+                order: [
+                    orderBy
+                ],
+                limit:pData.length, offset:pData.start})
+            .then(musers => {
+                callback(null,musers);
+            })
+            .catch(function (err) {
+                callback(err);
+            });                        
+        }
+    ],(err,results) => {
+            let json_res = {};
+            json_res['draw'] = pData.draw;
+        if(err){            
+            json_res['success'] = false;
+            json_res['recordsTotal'] = 0;
+            json_res['recordsFiltered'] = 0;
+            json_res['message'] = err;    
+            json_res['data'] = [];              
+        }
+        else{
+            json_res['success'] = true;
+            json_res['recordsTotal'] = results[0];
+            json_res['recordsFiltered'] = results[0];
+            json_res['data'] = results[1];
+        }                   
+        cb(json_res);
+    })
+};
+
 noResults = (result, response) => {
     result.success = 'failure';
     result.message = 'Something went wrong';
@@ -464,44 +522,10 @@ createUserProfile = (postData, cb) => {
 }
 
 exports.GetUser = (req, res) => {
-    models.users.hasOne(models.user_profile);
-    models.user_profile.belongsTo(models.sectors);
-    models.user_profile.belongsTo(models.company_details, { foreignKey: 'company_id' });
-    models.user_profile.belongsTo(models.subsectors);
-    models.user_profile.belongsTo(models.countries);
-    models.user_profile.belongsTo(models.states);
-    models.users.findOne({
+    
+    models.mobile_users.findOne({
         where: { id: req.params.id },
-        include: [
-            {
-                model: models.user_profile,
-                attributes: ['company_url', 'company_logo', 'company_name','company_id',
-                    'sector_id', 'subsector_id', 'country_id', 'state_id', 'city', 'zip_code', 'profile_pic', 'about'
-                ],
-                include: [
-                    {
-                        model: models.sectors,
-                        attributes: ['id', 'name']
-                    },
-                    {
-                        model: models.company_details,
-                        attributes: ['id','name']
-                    },
-                    {
-                        model: models.subsectors,
-                        attributes: ['id', 'name']
-                    },
-                    {
-                        model: models.countries,
-                        attributes: ['id', 'name']
-                    },
-                    {
-                        model: models.states,
-                        attributes: ['id', 'name']
-                    }
-                ],
-            }
-        ],
+       
     }).then(user => {
         let json_res = {};
         if (user) {
@@ -509,31 +533,9 @@ exports.GetUser = (req, res) => {
             json_res['success'] = true;
             json_res['data'] =
                 {
-                    'first_name': user.first_name,
-                    'last_name': user.last_name,
-                    'email': user.email,
-                    'contact_number': user.contact_number,
-                    'password': null,
-                    'confirm_password': null,
+                    'user_name': user.user_name,
+                    'user_email': user.user_email,
                     'status': user.status,
-                    'company_url': user.user_profile ? user.user_profile.company_url : null,
-                    'company_logo': user.user_profile ? user.user_profile.company_logo : null,
-                    'company_name': user.user_profile ? user.user_profile.company_name : null,
-                    'company_id': user.user_profile.company_detail ? user.user_profile.company_detail.id : null,
-                    'sector_id': user.user_profile.sector ? user.user_profile.sector.id : null,
-                    'subsector_id': user.user_profile.subsector ? user.user_profile.subsector.id : null,
-                    'country_id': user.user_profile.country ? user.user_profile.country.id : null,
-                    'state_id': user.user_profile.state ? user.user_profile.state.id : null,
-                    'sectorName': user.user_profile.sector ? user.user_profile.sector.name : null,
-                    'companyName': user.user_profile.company_detail ? user.user_profile.company_detail.name : null,
-                    'subsectorName': user.user_profile.subsector ? user.user_profile.subsector.name : null,
-                    'countryName': user.user_profile.country ? user.user_profile.country.name : null,
-                    'stateName': user.user_profile.state ? user.user_profile.state.name : null,
-                    'city': user.user_profile ? user.user_profile.city : null,
-                    'zip_code': user.user_profile ? user.user_profile.zip_code : null,
-                    'access_level': user.access_level,
-                    'profile_pic': user.user_profile ? user.user_profile.profile_pic : null,
-                    'about': user.user_profile ? user.user_profile.about : null,
                     'id': user.id
                 };
             res.json(json_res);
@@ -712,75 +714,53 @@ filterUsers = (req, res, userType, cb) => {
 }
 
 exports.UpdateUser = function (request, response) {
-    compUpload(request, response, function (err) {
-        let postData = JSON.parse(request.body.data);
-        models.users.hasOne(models.user_profile);
-        models.users.findOne({
-            where: { id: postData.id }, include: [{
-                model: models.user_profile,
-                attributes: ['company_url', 'company_logo', 'company_name','company_id', 'sector_id', 'subsector_id', 'country_id',
-                    'state_id', 'city', 'zip_code'], required: false
-            }]
+   
+        let postData = request.body;
+        models.mobile_users.findOne({
+            where: { id: postData.id },
         }).then(user => {
             let result = {};
+            
             if (user) {
-                if (postData.password !== null && postData.password !== undefined) {
-                    postData.password_hash = models.users.generateHash(postData.password);
-                }
-                if (request.file !== undefined) {
-                    if (user.company_logo) {
-                        files = user.company_logo;
-                        fs.unlinkSync('uploads/' + files)
-                    }
-                    postData.company_logo = 'analyst_comp_logo/' + request.file.filename;
-                }
+              
+                       
                 postData = utils.DeepTrim(postData)
+                
                 user.updateAttributes(postData).then((updatedUser) => {
-                    if (updatedUser) {
-                        models.user_profile.findOne({ where: { userId: postData.id } }).then(user_profile => {
-                            result.success = true;
-                            result.message = 'User updated successfully.';
-                            result.data = updatedUser;
-                            if (user_profile) {
-                                user_profile.updateAttributes(postData).then((updatedUserProfile) => {
-                                    if (!updatedUserProfile) result.message2 = 'User Profile Not updated';
-                                    response.json(result);
-                                })
-                            }
-                            else {
-                                postData.userId = user.id;
-                                createUserProfile(postData, userProfile => {
-                                    if (!userProfile) result.message2 = 'User Profile Not updated';
-                                    response.json(result);
-                                });
-                            }
-                        })
-                    }
-                    else {
-                        noResults(result, response);
-                    }
-                }).catch(Sequelize.ValidationError, function (err) {
-                    // respond with validation errors
+                    response.json(postData);
+        //             if (updatedUser) {
+                      
+        //                     result.success = true;
+        //                     result.message = 'User updated successfully.';
+        //                     result.data = updatedUser;
+                           
+                        
+                    // }
+        //             else {
+        //                 noResults(result, response);
+        //             }
+        //         }).catch(Sequelize.ValidationError, function (err) {
+        //             // respond with validation errors
 
-                    return response.status(200).json({
-                        success: false,
-                        message: err.message
-                    });
-                }).catch(function (err) {
-                    // every other error                
-                    return response.status(400).json({
-                        success: false,
-                        message: err
-                    });
+        //             return response.status(200).json({
+        //                 success: false,
+        //                 message: err.message
+        //             });
+        //         }).catch(function (err) {
+        //             // every other error                
+        //             return response.status(400).json({
+        //                 success: false,
+        //                 message: err
+        //             });
                 });
             }
-            else {
-                result.success = false;
-                result.message = 'User not existed.';
-                response.json(result);
-            }
+        //     else {
+        //         result.success = false;
+        //         result.message = 'User not existed.';
+        //         response.json(result);
+        //     }
         });
-    });
+   
 };
 
 

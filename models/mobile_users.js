@@ -44,16 +44,7 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    password :{
-      type:DataTypes.STRING,
-      allowNull: false,
-      validate: { 
-        len: {
-          args: [6, 20],
-          msg: "Password should be between 6 and 20 characters in length"
-        }
-      }
-    },   
+    password :DataTypes.STRING,
     status: DataTypes.INTEGER
   }, {
     classMethods: {
@@ -81,6 +72,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     hooks: {
       beforeSave: (mobile_users, {}) => {
+        
        mobile_users.password = bcrypt.hashSync(mobile_users.password, bcrypt.genSaltSync(config.salt), null);
        mobile_users.status = 1;
       }
