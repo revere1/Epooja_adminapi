@@ -45,8 +45,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     password :DataTypes.STRING,
-    status: DataTypes.INTEGER,
-    default_address:DataTypes.INTEGER
+    status: DataTypes.INTEGER
   }, {
     classMethods: {
       associate: function(models) {
