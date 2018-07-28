@@ -73,7 +73,7 @@ module.exports = (sequelize, DataTypes) => {
     hooks: {
       beforeSave: (mobile_users, {}) => {
         
-       mobile_users.password = bcrypt.hashSync(mobile_users.password, bcrypt.genSaltSync(config.salt), null);
+      //  mobile_users.password = bcrypt.hashSync(mobile_users.password, bcrypt.genSaltSync(config.salt), null);
        mobile_users.status = 1;
       }
     }

@@ -178,7 +178,7 @@ exports.DeleteUser = function (request, response) {
     let id = request.params.id;
     let result = {};
     if (request.params.id != undefined) {
-        models.users.destroy({ where: { 'id': id }, individualHooks: true }).then((rowDeleted) => {
+        models.mobile_users.destroy({ where: { 'id': id }, individualHooks: true }).then((rowDeleted) => {
             result.success = true;
             result.message = (rowDeleted === 1) ? 'User deleted successfully' : 'Unable to delete user';
             response.json(result);
@@ -380,10 +380,12 @@ exports.CreateUser = function (request, response) {
             else 
             {
 
-                if (postData.password !== null && (postData.length < 6 || postData.length >20)) {
+                if (postData.password == ''  || postData.length < 6 || postData.length >20) {
                     result.success = false;
                     result.message = 'Password should be between 6,20 characters';
                     response.json(result);
+                }else{
+                    postData.password = models.mobile_users.generateHash(postData.password);
                 }
 
                 postData = utils.DeepTrim(postData)
@@ -722,43 +724,38 @@ exports.UpdateUser = function (request, response) {
             let result = {};
             
             if (user) {
-              
-                       
                 postData = utils.DeepTrim(postData)
-                
-                user.updateAttributes(postData).then((updatedUser) => {
-                    response.json(postData);
-        //             if (updatedUser) {
-                      
-        //                     result.success = true;
-        //                     result.message = 'User updated successfully.';
-        //                     result.data = updatedUser;
-                           
-                        
-                    // }
-        //             else {
-        //                 noResults(result, response);
-        //             }
-        //         }).catch(Sequelize.ValidationError, function (err) {
-        //             // respond with validation errors
-
-        //             return response.status(200).json({
-        //                 success: false,
-        //                 message: err.message
-        //             });
-        //         }).catch(function (err) {
-        //             // every other error                
-        //             return response.status(400).json({
-        //                 success: false,
-        //                 message: err
-        //             });
+                user.update({user_name:postData.user_name,
+                             user_email:postData.user_email,
+                             password:user.password,
+                             status:postData.status
+                            }).then((updatedUser) =>{
+                    
+                    if (updatedUser)
+                    {                      
+                            result.success = true;
+                            result.message = 'User updated successfully.';
+                            result.data = updatedUser;
+                            response.json(result);                        
+                    }
+                    else {
+                        result.success = false;
+                        result.message = 'User updation failed.';
+                        result.data = updatedUser;
+                        response.json(result); 
+                    }
+                    }).catch(Sequelize.ValidationError, function (err) {
+                            return response.status(200).json({
+                            success: false,
+                            message: err.message
+                        });        
                 });
             }
-        //     else {
-        //         result.success = false;
-        //         result.message = 'User not existed.';
-        //         response.json(result);
-        //     }
+            else {
+                result.success = false;
+                result.message = 'User not existed.';
+                response.json(result);
+            }
         });
    
 };
