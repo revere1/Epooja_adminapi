@@ -4,6 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     category_id: DataTypes.INTEGER,
     subcategory_id: DataTypes.INTEGER,
     product_name: DataTypes.STRING,
+    product_code: DataTypes.STRING,
     product_description: DataTypes.STRING,
     path: DataTypes.STRING,
     cost: DataTypes.STRING,
