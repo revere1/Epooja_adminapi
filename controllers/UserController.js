@@ -1007,3 +1007,28 @@ exports.CreateAnalystFollower = function (request, response) {
     })
 }
 
+exports.getUerDetails = function(req,res){
+    let id = req.params.id;
+    if(id != '')
+    {
+        models.mobile_users.findOne({
+            where:{id:id}
+        }).then(user=>{
+            models.mobile_user_address.findAll({
+                where:{user_id:user.id}
+            }).then(addresses=>{
+                let results={};
+                results.user = user;
+                results.addresses = addresses;
+                results.success = true;
+                res.json(results);                
+            });
+        });
+    }
+    else
+    {
+        res.json({success:false,message:"Invalid request,user id missing"});
+    }
+
+};
+

@@ -94,7 +94,7 @@ exports.GetProductDetails = (req,res)=>
         where: {
             $and : [
                     {id: req.params.pid},
-                    {status: 1}
+                    {status: 'active'}
                 ]            
         }        
     }).then(function (product) {

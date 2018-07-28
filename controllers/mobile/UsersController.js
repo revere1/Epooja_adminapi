@@ -24,6 +24,15 @@ exports.Register = (req,res)=>
             res.json(result);
         }
         else {
+
+            if (postData.password == ''  || postData.length < 6 || postData.length >20) {
+                result.success = false;
+                result.message = 'Password should be between 6,20 characters';
+                response.json(result);
+            }else{
+                postData.password = models.mobile_users.generateHash(postData.password);
+            }
+
             postData = utils.DeepTrim(postData);
             models.mobile_users.create(postData).then(user1 => {
                 if (user1){                              
