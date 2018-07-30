@@ -198,6 +198,9 @@ module.exports = function (app) {
         apiRoutes.post('/filterUsers', UserController.FilterMUsers);
         apiRoutes.get('/user/:id', UserController.GetUser);
         apiRoutes.put('/user/:id', UserController.UpdateUser);
+        apiRoutes.get('/user-details/:id', UserController.getUerDetails);
+
+        
 
         apiRoutes.post('/privillage', UserController.CreatePrivillage);
         apiRoutes.get('/privillage/:id', UserController.GetPrivillages);

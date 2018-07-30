@@ -179,9 +179,15 @@ exports.DeleteUser = function (request, response) {
     let result = {};
     if (request.params.id != undefined) {
         models.mobile_users.destroy({ where: { 'id': id }, individualHooks: true }).then((rowDeleted) => {
-            result.success = true;
-            result.message = (rowDeleted === 1) ? 'User deleted successfully' : 'Unable to delete user';
+            models.mobile_user_address.destroy({where:{'user_id':id}, individualHooks: true}).then((res)=>{
+                result.success = true;
+                result.message = (rowDeleted === 1) ? 'User deleted successfully' : 'Unable to delete user';
+                response.json(result);
+            },(err)=>{
+            result.success = false;
+            result.message = 'User deleted successfully, But his associated addresses not deleted';
             response.json(result);
+            })           
         }, (err) => {
             result.success = false;
             result.message = 'Something went wrong';
@@ -1006,4 +1012,30 @@ exports.CreateAnalystFollower = function (request, response) {
         }
     })
 }
+
+exports.getUerDetails = function(req,res){
+    let id = req.params.id;
+    if(id != '')
+    {
+        models.mobile_users.findOne({
+            where:{id:id},
+            attributes:['id','user_name','user_email','createdAt','status']
+        }).then(user=>{
+            models.mobile_user_address.findAll({
+                where:{user_id:user.id}
+            }).then(addresses=>{
+                let results={};
+                results.user = user;
+                results.addresses = addresses;
+                results.success = true;
+                res.json(results);                
+            });
+        });
+    }
+    else
+    {
+        res.json({success:false,message:"Invalid request,user id missing"});
+    }
+
+};
 

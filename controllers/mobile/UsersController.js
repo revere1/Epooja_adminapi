@@ -24,6 +24,15 @@ exports.Register = (req,res)=>
             res.json(result);
         }
         else {
+
+            if (postData.password == ''  || postData.length < 6 || postData.length >20) {
+                result.success = false;
+                result.message = 'Password should be between 6,20 characters';
+                response.json(result);
+            }else{
+                postData.password = models.mobile_users.generateHash(postData.password);
+            }
+
             postData = utils.DeepTrim(postData);
             models.mobile_users.create(postData).then(user1 => {
                 if (user1){                              
@@ -73,13 +82,11 @@ exports.Login = (req,res)=>
                 res.status(201).json({
                     success: true,
                     data: {
-                        'userid': user.id,
+                        'user_id': user.id,
                         'email': user.user_email,
-                        'first_name': user.first_name,
-                        'last_name': user.last_name,
+                        'user_name': user.user_name,
                         'status': user.status,
-                        'registerdAt': user.createdAt,
-                        'profile_pic':''
+                        'registerdAt': user.createdAt
                     },
                     token: token
                 });
@@ -105,7 +112,30 @@ exports.Login = (req,res)=>
 };
 
 
-
+exports.saveUserAddress = function(req,res){
+    let postData = req.body;
+    let result = {};
+    model.mobile_user_address.create(postData).then((saddr)=>{
+        if(saddr)
+        { 
+            result.success = true;
+            result.message = 'User address successfully added';
+            res.json(result);
+        }
+    else{
+        noResults(result, res)
+    }
+}).catch(function (err) {
+    result.success = false;
+    errs = [];
+    (err.errors).forEach(er => {           
+       errs.push(er.message);     
+    });
+    result.message = errs.join(',');
+    res.json(result);
+  });
+    
+}
 
 exports.authenticate = function (req, res, next) {
 
