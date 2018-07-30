@@ -170,29 +170,29 @@ exports.Upload = function (request,response){
     });  
 }
 
-// exports.RemoveFile = (req, res)=>{
-//     result = {};
-//     if(req.headers['file'] != undefined){
-//         fs.unlink('uploads/'+req.headers['file'],(err)=>{
-//             if(!err)
-//             {
-//                 result.success = true;
-//                 result.message = 'Deleted Successfully';                
-//             }
-//             else{
-//                 result.success = false;
-//                 result.message = err.message;
-//             }   
-//             return res.json(result);
+exports.RemoveFile = (req, res)=>{
+    result = {};
+    if(req.headers['file'] != undefined){
+        fs.unlink('uploads/'+req.headers['file'],(err)=>{
+            if(!err)
+            {
+                result.success = true;
+                result.message = 'Deleted Successfully';                
+            }
+            else{
+                result.success = false;
+                result.message = err.message;
+            }   
+            return res.json(result);
 
-//         });     
-//     }
-//     else{
-//         result.success = false;
-//         result.message = 'Problem with your request';
-//         return res.json(result);
-//     }
-// }
+        });     
+    }
+    else{
+        result.success = false;
+        result.message = 'Product with your request';
+        return res.json(result);
+    }
+}
 exports.FilterProducts = (req, res) => {
     filterProducts(req, res, (records) => {
         return res.json(records);
@@ -284,24 +284,24 @@ filterProducts = (req, res, cb) => {
     })
 }
 
-exports.AutoSearchProducts = function (request, response) {
-    let term = request.query.p;
-    models.products.findOne({
-        where: {
-            name: {
-                $like: '%' + term + '%'
-            }
-        },
-        attributes: ['id', ['name', 'sku']],
-        required: false
-    }).then(products => {
-        $result = [];
-        if (products) $result.push(products);
-        response.json($result);
-    }).catch(function (err) {
-        response.json([]);
-    });
-};
+// exports.AutoSearchProducts = function (request, response) {
+//     let term = request.query.p;
+//     models.products.findOne({
+//         where: {
+//             name: {
+//                 $like: '%' + term + '%'
+//             }
+//         },
+//         attributes: ['id', ['name', 'sku']],
+//         required: false
+//     }).then(products => {
+//         $result = [];
+//         if (products) $result.push(products);
+//         response.json($result);
+//     }).catch(function (err) {
+//         response.json([]);
+//     });
+// };
 
 exports.UpdateProduct = function (request, response) {
     let postData = request.body;
