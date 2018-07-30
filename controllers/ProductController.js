@@ -77,30 +77,76 @@ exports.DeleteProduct = function (request, response) {
 };
 var upload = multer({ storage : utils.assestDest('product_images') }).single('file');
 
+// exports.CreateProduct = function (request, response) {
+//     let postData = utils.DeepTrim(request.body);
+//     models.products.findOne({ where: { product_name: postData.product_name } }).then(products => {
+//         let result = {};
+//         if (products) {
+//             result.success = false;
+//             result.message = 'Product already existed.';
+//             response.json(result);
+//         }
+//         else {
+//             models.products.create(postData).then(products => {
+//                 if (products) {
+//                     result.success = true;
+//                     result.message = 'Product successfully created';
+//                 }
+//                 else {
+//                     result.success = true;
+//                     result.message = 'Product not successfully created';
+//                 }
+//                 response.json(result);
+//             });
+//         }
+//     });
+// };
+
 exports.CreateProduct = function (request, response) {
-    let postData = utils.DeepTrim(request.body);
-    models.products.findOne({ where: { product_name: postData.product_name } }).then(products => {
+
+    let postData = request.body;
+    //return response.json(postData);
+    let result = {};
+    models.products.create(postData).then(products => {
         let result = {};
         if (products) {
-            result.success = false;
-            result.message = 'Product already existed.';
-            response.json(result);
-        }
-        else {
-            models.products.create(postData).then(products => {
-                if (products) {
+            if (postData.files.length) {
+                let filesData = [];
+                // for (let file in postData.files) {
+                //     filesData[file] = { 'problemId': problems.id, 'path': postData.files[file] };
+                // }
+                for (let file in postData.files) {
+                    var orgname = postData.files[file].split('-');
+                    var mimetype = postData.files[file].split('.');
+
+                    filesData[file] = { 'productId': products.id, 'path': postData.files[file], 'orgName': orgname[1], 'mime_type': mimetype[mimetype.length - 1] };
+                }
+                models.product_images.bulkCreate(filesData).then(function (test) {
                     result.success = true;
                     result.message = 'Product successfully created';
-                }
-                else {
-                    result.success = true;
-                    result.message = 'Product not successfully created';
-                }
-                response.json(result);
-            });
+                    return response.json(result);
+                }).catch(function (err) {
+                    result.success = false;
+                    result.message = err.message;
+                    return response.json(result);
+                });
+            }
+            else {
+                result.success = true;
+                result.message = 'Products successfully created';
+                return response.json(result);
+            }
+
         }
+        else {
+            noResults(result, response)
+        }
+
+
     });
+
 };
+
 noResults = (result, response) => {
     result.success = 'failure';
     result.message = 'Something went wrong';
@@ -120,6 +166,7 @@ exports.GetProduct= (req, res) => {
                 'product_description':product.product_description,
                 'path':product.path,
                 'cost':product.cost,
+                'delivery_days':product.delivery_days,
                 'quatity':product.quatity,
                 'category_id': product.category_id,
                 'subcategory_id': product.subcategory_id,
@@ -170,29 +217,29 @@ exports.Upload = function (request,response){
     });  
 }
 
-exports.RemoveFile = (req, res)=>{
-    result = {};
-    if(req.headers['file'] != undefined){
-        fs.unlink('uploads/'+req.headers['file'],(err)=>{
-            if(!err)
-            {
-                result.success = true;
-                result.message = 'Deleted Successfully';                
-            }
-            else{
-                result.success = false;
-                result.message = err.message;
-            }   
-            return res.json(result);
+// exports.RemoveFile = (req, res)=>{
+//     result = {};
+//     if(req.headers['file'] != undefined){
+//         fs.unlink('uploads/'+req.headers['file'],(err)=>{
+//             if(!err)
+//             {
+//                 result.success = true;
+//                 result.message = 'Deleted Successfully';                
+//             }
+//             else{
+//                 result.success = false;
+//                 result.message = err.message;
+//             }   
+//             return res.json(result);
 
-        });     
-    }
-    else{
-        result.success = false;
-        result.message = 'Product with your request';
-        return res.json(result);
-    }
-}
+//         });     
+//     }
+//     else{
+//         result.success = false;
+//         result.message = 'Product with your request';
+//         return res.json(result);
+//     }
+// }
 exports.FilterProducts = (req, res) => {
     filterProducts(req, res, (records) => {
         return res.json(records);
@@ -236,7 +283,7 @@ filterProducts = (req, res, cb) => {
 
     let options = {
         where: where,
-        attributes: ['id', 'product_name','product_code','product_description', 'path','cost', 'quatity','status'],
+        attributes: ['id', 'product_name','product_code','product_description', 'path','cost','delivery_days', 'quatity','status'],
         include: [
             {
                 model: models.category,
