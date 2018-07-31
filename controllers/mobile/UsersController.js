@@ -115,7 +115,39 @@ exports.Login = (req,res)=>
 exports.saveUserAddress = function(req,res){
     let postData = req.body;
     let result = {};
-    model.mobile_user_address.create(postData).then((saddr)=>{
+    let aerrs = [];
+
+    if(isNaN(postData.user_id )){
+        aerrs.push('Invalid user');
+    }
+    if(postData.full_name == '' || postData.full_name.length < 2 ||  postData.full_name.length > 50){
+        aerrs.push('Name should be in betwwen 3 to 50 characters');
+    }
+    if(postData.address1 == ''){
+        aerrs.push('Address1 should not be empty');
+    }
+    if(postData.address2 == ''){
+        aerrs.push('Address2 should not be empty');
+    }
+    if(postData.city == ''){
+        aerrs.push('City should not be empty');
+    }
+    if(postData.state == ''){
+        aerrs.push('State should not be empty');
+    }
+    if(postData.country == ''){
+        aerrs.push('Country should not be empty');
+    }
+    if(isNaN(postData.contact_number ) || postData.contact_number.length < 10 ||  postData.contact_number.length > 12){
+        aerrs.push('Invalid mobile number');
+    }
+    if(isNaN(postData.postal_code ) || postData.postal_code.length < 6 ||  postData.postal_code.length > 8){
+        aerrs.push('Invalid posatl code');
+    }
+if(aerrs.length > 0){
+    res.json({success:false,aerrors:aerrs});
+}else{
+    models.mobile_user_address.create(postData).then((saddr)=>{
         if(saddr)
         { 
             result.success = true;
@@ -125,18 +157,50 @@ exports.saveUserAddress = function(req,res){
     else{
         noResults(result, res)
     }
-}).catch(function (err) {
-    result.success = false;
-    errs = [];
-    (err.errors).forEach(er => {           
-       errs.push(er.message);     
+}).catch(Sequelize.ValidationError, function (err) {
+    return response.status(200).json({
+            success: false,
+            message: err.message
     });
-    result.message = errs.join(',');
-    res.json(result);
-  });
+}).catch(function (err) {
+                                  
+    return response.status(400).json({
+            success: false,
+            message: err
+    });
+});
+}
     
 }
 
+exports.getUserAddresses = function(req,res){
+    let user_id = req.body.user_id;
+    let results = {};
+    if(user_id != '')
+    {
+        models.mobile_user_address.findAll({
+            where:{
+                user_id : user_id
+            }
+        }).then(function(adrs){
+    let results = {};
+            results.success = true;
+            results.addresses = adrs;
+            res.json(results);
+        }).catch(function (err) {
+            return response.status(400).json({
+                success: false,
+                message: err
+            });
+        });
+    }
+    else
+    {
+        results.success = false;
+        results.message = 'Invalid request, user id missed';
+    }
+
+}
 exports.authenticate = function (req, res, next) {
 
     // check header or url parameters or post parameters for token
