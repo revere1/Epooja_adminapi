@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     product_description: DataTypes.STRING,
     path: DataTypes.STRING,
     cost: DataTypes.STRING,
+    delivery_days:DataTypes.STRING,
     quatity: DataTypes.STRING,
     status: DataTypes.STRING
   },  {

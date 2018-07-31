@@ -253,7 +253,7 @@ module.exports = function (app) {
     //apiRoutes.delete('/products/remove-file', ProductController.RemoveFile);
     apiRoutes.post('/filterProducts', ProductController.FilterProducts);
     apiRoutes.delete('/product/:id', ProductController.DeleteProduct);
-    apiRoutes.get('/auto-search-products', ProductController.AutoSearchProducts);
+    //apiRoutes.get('/auto-search-products', ProductController.AutoSearchProducts);
 
 
    //lockers
