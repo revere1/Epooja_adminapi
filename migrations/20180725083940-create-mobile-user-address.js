@@ -11,7 +11,11 @@ module.exports = {
       user_id: {
         type: Sequelize.INTEGER
       },
-      company: {
+      contact_number : 
+      {
+        type:DataTypes.INTEGER(10),
+      },
+      full_name: {
         type: Sequelize.STRING
       },
       address1: {
