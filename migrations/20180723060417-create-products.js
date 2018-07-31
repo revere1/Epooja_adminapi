@@ -20,7 +20,7 @@ module.exports = {
       quatity: {
         type: Sequelize.STRING
       },
-      path: {
+      product_img: {
         type: Sequelize.STRING
       },
       createdAt: {

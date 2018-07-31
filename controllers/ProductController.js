@@ -129,6 +129,13 @@ noResults = (result, response) => {
     response.json(result);
 }
 
+createProductsFiles = (postData, cb) => {
+    console.log(postData)
+    models.product_images.create(postData).then(product_images => {
+        cb(product_images);
+    });
+}
+
 exports.GetProduct = (req, res) => {
     models.products.hasMany(models.product_images);
     models.products.findOne({
@@ -207,16 +214,15 @@ exports.Upload = function (request,response){
     });  
 }
 
-createProductFiles = (postData, cb) => {
-    models.product_images.create(postData).then(product_images => {
-        cb(product_images);
-    });
-}
+
+
+
 exports.FilterProducts = (req, res) => {
     filterProducts(req, res, (records) => {
         return res.json(records);
     });
 }
+
 
 filterProducts = (req, res, cb) => {
     models.products = models.products;
@@ -256,7 +262,7 @@ filterProducts = (req, res, cb) => {
 
     let options = {
         where: where,
-        attributes: ['id', 'product_name','product_code','product_description', 'path','cost','delivery_days', 'quatity','status'],
+        attributes: ['id', 'product_name','product_code','product_description', 'product_img','cost','delivery_days', 'quatity','status'],
         include: [
             {
                 model: models.category,
@@ -323,7 +329,19 @@ filterProducts = (req, res, cb) => {
         cb(json_res);
     })
 }
-var insImgUpload = multer({ storage: utils.assestDest('path') }).single('path');
+
+var storage = multer.diskStorage({
+    destination: function (req, file, callback) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+            return callback(new Error('Only image files are allowed!'));
+        }
+        callback(null, 'uploads/product_images');
+    },
+    filename: function (req, file, callback) {
+        callback(null, md5((Date.now()) + file.originalname) + req.app.locals.path.extname(file.originalname));
+    }
+});
+var insImgUpload = multer({ storage: utils.assestDest('product_images') }).single('path');
 exports.UpdateProduct = function (request, response) {
     insImgUpload(request, response, function (err) {
     //return response.json(request.body);
@@ -331,22 +349,22 @@ exports.UpdateProduct = function (request, response) {
     models.products.findOne({ where: { id: request.params.id }, required: false }).then(products => {
         let result = {};
         if (products) {
-            // if (request.file !== undefined){
-            //     if(products.path){
-            //         file = products.path;
-            //         fs.unlinkSync('uploads/' + file)
-            //     }
-            //     postData.path = 'insight_img/' + request.file.filename;
-            // }
-            console.log(postData)
-            trimPostData = utils.DeepTrim(postData)
+            if (request.file !== undefined){
+                if(products.path){
+                    file = products.path;
+                    //fs.unlinkSync('uploads/' + file)
+                }
+                postData.path = 'product_images/' + request.file.filename;
+            }
+            //console.log(postData)
+            //trimPostData = utils.DeepTrim(postData)
             products.updateAttributes(postData).then((updateProducts) => {
                 let filesData = [];
                 postData.files = (postData.files).length ? (postData.files).split(',') : [];
                 for (let file in postData.files) {
                     var orgname = postData.files[file].split('-');
                     var mimetype = postData.files[file].split('.');
-                    filesData[file] = { 'productId': products.id, 'path': postData.files[file], 'orgName': orgname[1], 'mime_type': mimetype[mimetype.length - 1] };
+                    filesData[file] = { 'productId':products.id, 'path': postData.files[file], 'orgName': orgname[1], 'mime_type': mimetype[mimetype.length - 1] };
                 }
                 postData.productId = products.id;
                 models.product_images.bulkCreate(filesData).then(function (test) {
@@ -428,3 +446,25 @@ exports.DeleteProductsAttachements = function (request, res) {
         }
     });
 };
+
+var Iuploads = multer({ storage: utils.assestDest('summary-note-images') }).array('userphoto');
+exports.UploadImage = function (request, response) {
+    Iuploads(request, response, function (err) {
+        let json_data = {};
+        json_data.success = false;
+        if (request.files) {
+            json_data['data'] = [];
+            (request.files).forEach(file => {
+                json_data['data'].push('summary-note-images/' + file.filename);
+            })
+            json_data['success'] = true;
+            //json_data['data'] = 'summary-note-images/' + request.file.filename;
+            //json_data['mimetype'] = request.files.mimetype;
+            //json_data['name'] = request.file.originalname;
+        }
+        else {
+            json_data.message = err.message;
+        }
+        response.json(json_data);
+    });
+}
