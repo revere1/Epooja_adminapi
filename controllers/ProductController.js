@@ -341,7 +341,7 @@ var storage = multer.diskStorage({
         callback(null, md5((Date.now()) + file.originalname) + req.app.locals.path.extname(file.originalname));
     }
 });
-var insImgUpload = multer({ storage: utils.assestDest('product_images') }).single('path');
+var insImgUpload = multer({ storage: utils.assestDest('product_images') }).array('path');
 exports.UpdateProduct = function (request, response) {
     insImgUpload(request, response, function (err) {
     //return response.json(request.body);
@@ -391,29 +391,29 @@ exports.UpdateProduct = function (request, response) {
     });
 });
 };
-// exports.RemoveFile = (req, res)=>{
-//     result = {};
-//     if(req.headers['file'] != undefined){
-//         fs.unlink('uploads/'+req.headers['file'],(err)=>{
-//             if(!err)
-//             {
-//                 result.success = true;
-//                 result.message = 'Deleted Successfully';                
-//             }
-//             else{
-//                 result.success = false;
-//                 result.message = err.message;
-//             }   
-//             return res.json(result);
+exports.RemoveFile = (req, res)=>{
+    result = {};
+    if(req.headers['file'] != undefined){
+        fs.unlink('uploads/'+req.headers['file'],(err)=>{
+            if(!err)
+            {
+                result.success = true;
+                result.message = 'Deleted Successfully';                
+            }
+            else{
+                result.success = false;
+                result.message = err.message;
+            }   
+            return res.json(result);
 
-//         });     
-//     }
-//     else{
-//         result.success = false;
-//         result.message = 'Product with your request';
-//         return res.json(result);
-//     }
-// }
+        });     
+    }
+    else{
+        result.success = false;
+        result.message = 'Product with your request';
+        return res.json(result);
+    }
+}
 exports.DeleteProductsAttachements = function (request, res) {
     models.product_images.findAll({
         where: { 'id': request.params.id },
