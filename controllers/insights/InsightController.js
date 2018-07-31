@@ -65,55 +65,55 @@ var storage = multer.diskStorage({
     }
 });
 var insImgUpload = multer({ storage: utils.assestDest('insight_img') }).single('insight_img');
-exports.UpdateInsight = function (request, response) {
-    insImgUpload(request, response, function (err) {
-    //return response.json(request.body);
-    let postData = request.body;
-    models.insights.findOne({ where: { id: request.params.id }, required: false }).then(insights => {
-        let result = {};
-        if (insights) {
-            if (request.file !== undefined){
-                if(insights.insight_img){
-                    file = insights.insight_img;
-                    fs.unlinkSync('uploads/' + file)
-                }
-                postData.insight_img = 'insight_img/' + request.file.filename;
-            }
-            //console.log(postData)
-            //trimPostData = utils.DeepTrim(postData)
-            insights.updateAttributes(postData).then((updateInsights) => {
-                let filesData = [];
-                postData.files = (postData.files).length ? (postData.files).split(',') : [];
-                for (let file in postData.files) {
-                    var orgname = postData.files[file].split('-');
-                    var mimetype = postData.files[file].split('.');
-                    filesData[file] = { 'insightId': insights.id, 'path': postData.files[file], 'orgName': orgname[1], 'mime_type': mimetype[mimetype.length - 1] };
-                }
-                postData.insightId = insights.id;
-                models.insight_attachements.bulkCreate(filesData).then(function (test) {
-                    if (updateInsights) {
-                        result.success = true;
-                        result.message = 'Insight Updated  successfully ';
-                    } else {
-                        result.success = true;
-                        result.message = 'Insight not Updated successfully ';
-                    }
-                    response.json(result);
-                }).catch(function (err) {
-                    result.success = false;
-                    result.message = err.message;
-                    return response.json(result);
-                });
-            })
-        }
-        else {
-            result.success = false;
-            result.message = 'Insight not existed.';
-            response.json(result);
-        }
-    });
-});
-};
+// exports.UpdateInsight = function (request, response) {
+//     insImgUpload(request, response, function (err) {
+//     //return response.json(request.body);
+//     let postData = request.body;
+//     models.insights.findOne({ where: { id: request.params.id }, required: false }).then(insights => {
+//         let result = {};
+//         if (insights) {
+//             if (request.file !== undefined){
+//                 if(insights.insight_img){
+//                     file = insights.insight_img;
+//                     fs.unlinkSync('uploads/' + file)
+//                 }
+//                 postData.insight_img = 'insight_img/' + request.file.filename;
+//             }
+//             console.log(postData)
+//             //trimPostData = utils.DeepTrim(postData)
+//             insights.updateAttributes(postData).then((updateInsights) => {
+//                 let filesData = [];
+//                 postData.files = (postData.files).length ? (postData.files).split(',') : [];
+//                 for (let file in postData.files) {
+//                     var orgname = postData.files[file].split('-');
+//                     var mimetype = postData.files[file].split('.');
+//                     filesData[file] = { 'insightId': insights.id, 'path': postData.files[file], 'orgName': orgname[1], 'mime_type': mimetype[mimetype.length - 1] };
+//                 }
+//                 postData.insightId = insights.id;
+//                 models.insight_attachements.bulkCreate(filesData).then(function (test) {
+//                     if (updateInsights) {
+//                         result.success = true;
+//                         result.message = 'Insight Updated  successfully ';
+//                     } else {
+//                         result.success = true;
+//                         result.message = 'Insight not Updated successfully ';
+//                     }
+//                     response.json(result);
+//                 }).catch(function (err) {
+//                     result.success = false;
+//                     result.message = err.message;
+//                     return response.json(result);
+//                 });
+//             })
+//         }
+//         else {
+//             result.success = false;
+//             result.message = 'Insight not existed.';
+//             response.json(result);
+//         }
+//     });
+// });
+// };
 var Iuploads = multer({ storage: utils.assestDest('summary-note-images') }).array('userphoto');
 exports.UploadImage = function (request, response) {
     Iuploads(request, response, function (err) {

@@ -8,14 +8,21 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      mime_tyep: {
+      mime_type: {
         type: Sequelize.STRING
       },
       path: {
         type: Sequelize.STRING
       },
       productId: {
-        type: Sequelize.STRING
+        type: Sequelize.INTEGER,
+        onUpdate: 'CASCADE',
+		    onDelete: 'CASCADE',
+        references: {
+          model: 'products',
+          key: 'id'
+        },
+        allowNull: false
       },
       orgName: {
         type: Sequelize.STRING

@@ -157,7 +157,7 @@ module.exports = function (app) {
     apiRoutes.get('/companySectorDist/:companyId',InsightController.GetSectorCompanyInsights);
     apiRoutes.get('/ins/:user',InsightController.GetLatestInsights);
     apiRoutes.get('/insight/:companyId',InsightController.companyInsights);
-    apiRoutes.put('/updateinsight/:id',InsightController.UpdateInsight);
+    //apiRoutes.put('/updateinsight/:id',InsightController.UpdateInsight);
     apiRoutes.post('/insight/path', InsightController.Upload);
     apiRoutes.post('/insights/files', InsightController.UploadImage);
     apiRoutes.post('/insightcomment/path', InsightController.InsightcommentUpload);
@@ -246,15 +246,15 @@ module.exports = function (app) {
     
     //Products
     apiRoutes.post('/product', ProductController.CreateProduct);
-    apiRoutes.put('/product/:id', ProductController.UpdateProduct);
+    apiRoutes.put('/updateproduct/:id',ProductController.UpdateProduct);
     apiRoutes.get('/product/:id', ProductController.GetProduct);
     apiRoutes.get('/products', ProductController.Products);
     apiRoutes.post('/products/path', ProductController.Upload);
-    //apiRoutes.delete('/products/remove-file', ProductController.RemoveFile);
+    apiRoutes.delete('/products/remove-file', ProductController.RemoveFile);
     apiRoutes.post('/filterProducts', ProductController.FilterProducts);
     apiRoutes.delete('/product/:id', ProductController.DeleteProduct);
-    //apiRoutes.get('/auto-search-products', ProductController.AutoSearchProducts);
-
+    apiRoutes.delete('/products/:id', ProductController.DeleteProductsAttachements);
+    apiRoutes.post('/products/files', ProductController.UploadImage);
 
    //lockers
    apiRoutes.post('/lockers', LockerController.CreateLocker);
