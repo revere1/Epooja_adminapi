@@ -79,7 +79,7 @@ exports.UpdateInsight = function (request, response) {
                 }
                 postData.insight_img = 'insight_img/' + request.file.filename;
             }
-            //console.log(postData)
+            console.log(postData)
             //trimPostData = utils.DeepTrim(postData)
             insights.updateAttributes(postData).then((updateInsights) => {
                 let filesData = [];

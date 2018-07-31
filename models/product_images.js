@@ -2,7 +2,7 @@
 module.exports = (sequelize, DataTypes) => {
   var product_images = sequelize.define('product_images', {
     productId: DataTypes.STRING,
-    mime_tyep: DataTypes.STRING,
+    mime_type: DataTypes.STRING,
     path: DataTypes.STRING,
     orgName: DataTypes.STRING
   },  {
@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
         product_images.belongsTo(models.products, {
           foreignKey: 'productId',
           onUpdate: 'CASCADE',
-          onDelete: 'RESTRICT'
+          onDelete: 'CASCADE'
         });
       }
     }
