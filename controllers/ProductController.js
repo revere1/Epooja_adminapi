@@ -4,10 +4,18 @@ const Op = Sequelize.Op;
 var jwt = require('jsonwebtoken');
 var config = require('./../config/config.json')['system'];
 var utils = require('./../helpers/utils');
+var db = require('../models/index');
 var async = require('async');
 var multer = require('multer'); 
 var fs = require('fs');
 
+
+function getFileSize(file)
+{
+    var stats = fs.statSync(file);
+    var fileSizeInBytes = stats["size"]
+    return fileSizeInBytes / 1000000.0;
+}
 //Get all products Method:GET
 exports.Products = function (request, response) {
     let $where = {}, not_consider = ['token', 'pageIndex', 'pageSize', 'sortField', 'sortOrder'];
@@ -129,13 +137,19 @@ noResults = (result, response) => {
     response.json(result);
 }
 
-createProductsFiles = (postData, cb) => {
+// createProductsFiles = (postData, cb) => {
+//     console.log(postData)
+//     models.product_images.create(postData).then(product_images => {
+//         cb(product_images);
+//     });
+// }
+
+createInsightFiles = (postData, cb) => {
     console.log(postData)
     models.product_images.create(postData).then(product_images => {
         cb(product_images);
     });
 }
-
 exports.GetProduct = (req, res) => {
     models.products.hasMany(models.product_images);
     models.products.findOne({
@@ -341,18 +355,19 @@ var storage = multer.diskStorage({
         callback(null, md5((Date.now()) + file.originalname) + req.app.locals.path.extname(file.originalname));
     }
 });
-var insImgUpload = multer({ storage: utils.assestDest('product_images') }).array('path');
+var insImgUpload = multer({ storage: utils.assestDest('product_images') }).single('path');
 exports.UpdateProduct = function (request, response) {
     insImgUpload(request, response, function (err) {
     //return response.json(request.body);
     let postData = request.body;
+    //console.log(postData)
     models.products.findOne({ where: { id: request.params.id }, required: false }).then(products => {
         let result = {};
         if (products) {
             if (request.file !== undefined){
                 if(products.path){
                     file = products.path;
-                    //fs.unlinkSync('uploads/' + file)
+                    fs.unlinkSync('uploads/' + file)
                 }
                 postData.path = 'product_images/' + request.file.filename;
             }
@@ -364,7 +379,7 @@ exports.UpdateProduct = function (request, response) {
                 for (let file in postData.files) {
                     var orgname = postData.files[file].split('-');
                     var mimetype = postData.files[file].split('.');
-                    filesData[file] = { 'productId':products.id, 'path': postData.files[file], 'orgName': orgname[1], 'mime_type': mimetype[mimetype.length - 1] };
+                    filesData[file] = { 'productId':id, 'path': postData.files[file], 'orgName': orgname[1], 'mime_type': mimetype[mimetype.length - 1] };
                 }
                 postData.productId = products.id;
                 models.product_images.bulkCreate(filesData).then(function (test) {
