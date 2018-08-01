@@ -5,7 +5,7 @@ const Op = Sequelize.Op;
 exports.addToCart = function(req,res){
     let uid = req.body.uid;
     let pid = req.body.pid;
-    let pcount = req.body.pcount;
+    let opr = req.body.opr;
     let cerrs = [];
 
     if(isNaN(uid)){
@@ -14,35 +14,86 @@ exports.addToCart = function(req,res){
     if(isNaN(pid)){
         cerrs.push('Invalid product id');
     }
-    if(isNaN(pcount)){
-        cerrs.push('Invalid count');
+    if(opr != 'add' && opr != 'sub'){
+        cerrs.push('Invalid cart operation');
     }
 
     if(cerrs.length > 0){
         res.json({success:false,cerrors:cerrs});
     }else{
-        models.cart.create({
-            pid:pid,
-            uid:uid,
-            pcount:pcount
-        }).then(function(cart){
 
-            if(cart){
-                res.json({
-                    success:true,
-                    message:"Product succefully added to cart"
-                });
+        models.cart.findOne({
+            where:{
+                pid:pid,
+                uid:uid
+            }
+        }).then(function(exist){
+           if(exist){
+               let pcount = exist.pcount;
+               if(opr == 'add')
+               {
+                   pcount = pcount + 1;
+               }
+               if(opr == 'sub')
+               {
+                   pcount = pcount - 1;
+               }
+
+               models.products.findOne({where:{id:pid}}).then(function(products){
+                    if(pcount > products.quantity){
+                        res.json({success:false,message:products.quantity+' items only available'});
+                    }else{
+                        exist.updateAttributes({
+                            pcount: pcount
+                         }).then(function(cart){        
+                             if(cart)
+                             {
+                                 res.json({
+                                     success:true,
+                                     message:"Product succefully added to cart"
+                                 });
+                             }
+                             else
+                             {
+                                 res.json({
+                                     success:false,
+                                     message:"Adding product to cart failed. Please try again"
+                                 });
+                             }
+                 
+                         });
+                    }
+               });
+
+               
             }else{
-                res.json({
-                    success:false,
-                    message:"Adding product to cart failed. Please try again"
+                models.cart.create({
+                    pid:pid,
+                    uid:uid,
+                    pcount:1
+                }).then(function(cart){
+        
+                    if(cart)
+                    {
+                        res.json({
+                            success:true,
+                            message:"Product succefully added to cart"
+                        });
+                    }
+                    else
+                    {
+                        res.json({
+                            success:false,
+                            message:"Adding product to cart failed. Please try again"
+                        });
+                    }
+        
                 });
             }
 
+            
         });
     }
-
-
 }
 exports.removeFromCart = function(req,res){
 let cid = req.body.cid;
@@ -86,8 +137,8 @@ exports.getCart = function(req,res)
     }
     else
     {
-    models.cart.hasOne(models.products,{ foreignKey: 'pid' });
-    models.cart.findAll({where:{uid:uid}}).then(function(cartitems){
+    models.cart.belongsTo(models.products,{ foreignKey: 'pid' });
+    models.cart.findAll({where:{uid:uid},include:[{model:models.products,attributes:['id','product_img','cost','product_name']}]}).then(function(cartitems){
         if(cartitems)
         {
             res.json({success:true,cartitems:cartitems});

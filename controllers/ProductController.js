@@ -262,7 +262,7 @@ filterProducts = (req, res, cb) => {
 
     let options = {
         where: where,
-        attributes: ['id', 'product_name','product_code','product_description', 'product_img','cost','delivery_days', 'quatity','status'],
+        attributes: ['id', 'product_name','product_code','product_description', 'product_img','cost','delivery_days', 'quantity','status'],
         include: [
             {
                 model: models.category,

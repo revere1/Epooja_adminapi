@@ -17,7 +17,7 @@ module.exports = {
       cost: {
         type: Sequelize.STRING
       },
-      quatity: {
+      quantity: {
         type: Sequelize.STRING
       },
       product_img: {

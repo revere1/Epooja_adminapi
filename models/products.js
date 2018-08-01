@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     product_img: DataTypes.STRING,
     cost: DataTypes.STRING,
     delivery_days:DataTypes.STRING,
-    quatity: DataTypes.STRING,
+    quantity: DataTypes.STRING,
     status: DataTypes.STRING
   },  {
     classMethods: {
