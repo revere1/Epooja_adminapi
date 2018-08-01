@@ -91,7 +91,7 @@ exports.GetProductsBySubCat = (req,res)=>
 }
 exports.GetProductDetails = (req,res)=>
 {
-    models.product_reviews.hasOne(models.mobile_users, { foreignKey: 'uid' });
+    models.product_reviews.belongsTo(models.mobile_users, { foreignKey: 'uid' });
     models.products.findOne({
         where: {
             $and : [
@@ -120,16 +120,37 @@ exports.GetProductDetails = (req,res)=>
                 }
                 ]        
             }).then(function (previews){
+
+
                 if (previews)
-                {
-                    res.status(201).json({
-                        success: true,
-                        data: {product:product,reviews:previews}
+                {                    
+                    models.product_images.findAll({
+                        where:{
+                            productId:product.id
+                        }
+                    }).then(function(pimages){
+
+                        if(pimages)
+                        {
+                            res.status(201).json({
+                                success: true,
+                                data: {product:product,reviews:previews,images:pimages}
+                            });
+                        }
+                        else
+                        {
+                            res.status(201).json({
+                                success: true,
+                                data: {product:product,reviews:previews,images:''}
+                            });
+                        }
+
                     });
+                  
                 }else{
                     res.status(201).json({
                         success: true,
-                        data: {product:product,reviews:''}
+                        data: {product:product,reviews:'',images:''}
                     });
                 }
                 
