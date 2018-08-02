@@ -106,6 +106,7 @@ exports.CreateProduct = function (request, response) {
                     filesData[file] = { 'productId': products.id, 'path': postData.files[file], 'orgName': orgname[1], 'mime_type': mimetype[mimetype.length - 1] };
                 }
                 models.product_images.bulkCreate(filesData).then(function (test) {
+                    console.log(postData)
                     result.success = true;
                     result.message = 'Product successfully created';
                     return response.json(result);
@@ -355,31 +356,34 @@ var storage = multer.diskStorage({
         callback(null, md5((Date.now()) + file.originalname) + req.app.locals.path.extname(file.originalname));
     }
 });
-var insImgUpload = multer({ storage: utils.assestDest('product_images') }).single('path');
+var insImgUpload = multer({ storage: utils.assestDest('product_img') }).single('product_img');
+
 exports.UpdateProduct = function (request, response) {
     insImgUpload(request, response, function (err) {
     //return response.json(request.body);
     let postData = request.body;
-    //console.log(postData)
     models.products.findOne({ where: { id: request.params.id }, required: false }).then(products => {
         let result = {};
         if (products) {
             if (request.file !== undefined){
-                if(products.path){
-                    file = products.path;
-                    fs.unlinkSync('uploads/' + file)
+                if(products.product_img){
+                    file = products.product_img;
+                    if(fs.existsSync('uploads/'+file)){
+                        fs.unlinkSync('uploads/' + file)
+                    }
                 }
-                postData.path = 'product_images/' + request.file.filename;
+                postData.product_img = 'product_img/' + request.file.filename;
             }
-            //console.log(postData)
+            console.log(postData)
             //trimPostData = utils.DeepTrim(postData)
             products.updateAttributes(postData).then((updateProducts) => {
                 let filesData = [];
-                postData.files = (postData.files).length ? (postData.files).split(',') : [];
+                console.log(postData)
+                postData.files = (postData.files !== undefined && (postData.files).length) ? (postData.files).split(',') : [];
                 for (let file in postData.files) {
                     var orgname = postData.files[file].split('-');
                     var mimetype = postData.files[file].split('.');
-                    filesData[file] = { 'productId':id, 'path': postData.files[file], 'orgName': orgname[1], 'mime_type': mimetype[mimetype.length - 1] };
+                    filesData[file] = { 'productId': products.id, 'path': postData.files[file], 'orgName': orgname[1], 'mime_type': mimetype[mimetype.length - 1] };
                 }
                 postData.productId = products.id;
                 models.product_images.bulkCreate(filesData).then(function (test) {
@@ -406,6 +410,57 @@ exports.UpdateProduct = function (request, response) {
     });
 });
 };
+// exports.UpdateProduct = function (request, response) {
+//     insImgUpload(request, response, function (err) {
+//     //return response.json(request.body);
+//     let postData = request.body;
+//     console.log(postData)
+//     models.products.findOne({ where: { id: request.params.id }, required: false }).then(products => {
+//         let result = {};
+//         if (products) {
+//             if (request.file !== undefined){
+//                 if(products.product_img){
+//                     file = products.product_img;
+//                     fs.unlinkSync('uploads/' + file)
+//                 }
+//                 postData.product_img = 'product_images/' + request.file.filename;
+//             }
+//             //console.log(postData)
+//             //trimPostData = utils.DeepTrim(postData)
+//             products.updateAttributes(postData).then((updateProducts) => {
+//                 let filesData = [];
+//                 postData.files = postData.files.length;
+//                 console.log(postData.files)
+//                 for (let file in postData.files) {
+//                     // var orgname = postData.files[file];
+//                     // var mimetype = postData.files[file];
+//                     filesData[file] = { 'productId':id, 'path': postData.files[file]};
+//                 }
+//                 postData.productId = products.id;
+//                 models.product_images.bulkCreate(filesData).then(function (test) {
+//                     if (updateProducts) {
+//                         result.success = true;
+//                         result.message = 'Product Updated  successfully ';
+//                     } else {
+//                         result.success = true;
+//                         result.message = 'Product not Updated successfully ';
+//                     }
+//                     response.json(result);
+//                 }).catch(function (err) {
+//                     result.success = false;
+//                     result.message = err.message;
+//                     return response.json(result);
+//                 });
+//             })
+//         }
+//         else {
+//             result.success = false;
+//             result.message = 'Product not existed.';
+//             response.json(result);
+//         }
+//     });
+// });
+// };
 exports.RemoveFile = (req, res)=>{
     result = {};
     if(req.headers['file'] != undefined){
