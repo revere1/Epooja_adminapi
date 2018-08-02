@@ -23,25 +23,26 @@ exports.getCountries = function(req,res){
     });
 };
 exports.getStates = function(req,res){
+    
     let country_id = req.body.country_id;
+    
     if(country_id != '')
     {
+        
         models.states.findAll({
             where:{
-                and:{
                     country_id:country_id,
-                    satus : 'active'
-                }
-                
+                    status : 'active'
             }
         }).then(states=>{
+            
             if(states){
                 res.json({success:true,states:states});
             }else{
                 res.json({success:false,message:"Something went wrong,Please try again"});
             }
         }).catch(function (err) {
-            return response.json({success:false,message:err.message});
+            return res.json({success:false,message:err.message});
          });
     }else
     {

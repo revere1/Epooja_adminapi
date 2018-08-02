@@ -151,17 +151,19 @@ exports.getCart = function(req,res)
     }
 }
 exports.getCartCount = function(req,res){
+   
 let uid = req.body.uid;
+console.log(uid);
 if(isNaN(uid)){
     res.json({success:false,message:'Invalid user id'});
 }else{
-    models.cart.findCount({where:{uid:uid}}).then(function(count){
+    models.cart.count({where:{uid:uid}}).then(function(count){
         if(count)
         {
             res.json({success:true,count:count});
         }
         else{
-            res.json({});
+            res.json({success:false,count:0});
         }
     });
 }
