@@ -1,6 +1,7 @@
 var UserController = require('./controllers/UserController');
 var ProductController = require('./controllers/ProductController');
 var CompanyController = require('./controllers/CompanyController');
+var OfferController = require('./controllers/OfferController');
 var CategoryController = require('./controllers/CategoryController');
 var SubcategoryController = require('./controllers/SubcategoryController');
 var CountriesController = require('./controllers/CountriesController');
@@ -266,6 +267,15 @@ module.exports = function (app) {
    apiRoutes.get('/locker-types',LockerController.LockerTypes);
 
    //apiRoutes.get('/usersalllocker/:id', LockerController.Users);
+   //Offers
+   apiRoutes.post('/categories', OfferController.CreateOffers);
+   apiRoutes.put('/categories/:id', OfferController.UpdateOffer);
+   apiRoutes.get('/categories/:id', OfferController.GetOffers);
+   apiRoutes.get('/categories', OfferController.Offers);
+   apiRoutes.delete('/categories/:id', OfferController.DeleteOffer);
+   apiRoutes.post('/filtercategories', OfferController.FilterOffers);
+   apiRoutes.post('/categories/path', OfferController.Upload);
+  
 
     //Categories
     apiRoutes.post('/categories', CategoryController.CreateCategories);
