@@ -150,3 +150,19 @@ exports.getCart = function(req,res)
      });
     }
 }
+exports.getCartCount = function(req,res){
+let uid = req.body.uid;
+if(isNaN(uid)){
+    res.json({success:false,message:'Invalid user id'});
+}else{
+    models.cart.findCount({where:{uid:uid}}).then(function(count){
+        if(count)
+        {
+            res.json({success:true,count:count});
+        }
+        else{
+            res.json({});
+        }
+    });
+}
+}
