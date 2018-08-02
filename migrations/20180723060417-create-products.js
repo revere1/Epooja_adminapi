@@ -17,6 +17,9 @@ module.exports = {
       cost: {
         type: Sequelize.STRING
       },
+      offer_price:{
+        type:Sequelize.STRING
+      },
       quantity: {
         type: Sequelize.STRING
       },
