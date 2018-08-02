@@ -26,6 +26,7 @@ module.exports = function (app) {
     apiRoutes.post('/add-to-cart',muser.authenticate,cart.addToCart);
     apiRoutes.post('/remove-from-cart',muser.authenticate,cart.removeFromCart);
     apiRoutes.post('/cart',muser.authenticate,cart.getCart);
+    apiRoutes.post('/cart-count',muser.authenticate,cart.getCartCount);
 
     apiRoutes.post('/add-to-wl',muser.authenticate,wl.addToWl);
     apiRoutes.post('/remove-from-wl',muser.authenticate,wl.removeFromWl);
