@@ -8,26 +8,32 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      offer_name:{
+        type: Sequelize.STRING
+      },
       desc: {
         type: Sequelize.STRING
       },
-      code: {
+      offer_code: {
         type: Sequelize.STRING
       },
-      dtype: {
-        type: Sequelize.INTEGER
+      discount_type: {
+        type: Sequelize.STRING
       },
-      dvalue: {
-        type: Sequelize.BIGINT
+      discount_value: {
+        type: Sequelize.STRING
       },
       limit: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
-      lvalue: {
-        type: Sequelize.BIGINT
+      limit_value: {
+        type: Sequelize.STRING
+      },
+      offer_img: {
+        type: Sequelize.STRING
       },
       status: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
