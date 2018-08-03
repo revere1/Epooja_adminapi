@@ -268,13 +268,13 @@ module.exports = function (app) {
 
    //apiRoutes.get('/usersalllocker/:id', LockerController.Users);
    //Offers
-   apiRoutes.post('/categories', OfferController.CreateOffers);
-   apiRoutes.put('/categories/:id', OfferController.UpdateOffer);
-   apiRoutes.get('/categories/:id', OfferController.GetOffers);
-   apiRoutes.get('/categories', OfferController.Offers);
-   apiRoutes.delete('/categories/:id', OfferController.DeleteOffer);
-   apiRoutes.post('/filtercategories', OfferController.FilterOffers);
-   apiRoutes.post('/categories/path', OfferController.Upload);
+   apiRoutes.post('/offers', OfferController.CreateOffers);
+   apiRoutes.put('/offers/:id', OfferController.UpdateOffer);
+   apiRoutes.get('/offers/:id', OfferController.GetOffers);
+   apiRoutes.get('/offers', OfferController.Offers);
+   apiRoutes.delete('/offers/:id', OfferController.DeleteOffer);
+   apiRoutes.post('/filteroffers', OfferController.FilterOffers);
+   apiRoutes.post('/offers/path', OfferController.Upload);
   
 
     //Categories

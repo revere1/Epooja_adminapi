@@ -11,11 +11,11 @@ var md5  = require('md5');
 var fs = require('fs');
 //var app   = require('../app');
 
-var upload = multer({ storage : utils.assestDest('category_images') }).single('file');
+var upload = multer({ storage : utils.assestDest('offers_images') }).single('file');
 
 exports.CreateOffers = function (request, response) {
     let postData = utils.DeepTrim(request.body);
-    models.category.findOne({ where: { category_name: postData.category_name } }).then(offers => {
+    models.offers.findOne({ where: { offer_name: postData.offer_name } }).then(offers => {
         let result = {};
         if (offers) {
             result.success = false;
@@ -23,7 +23,7 @@ exports.CreateOffers = function (request, response) {
             response.json(result);
         }
         else {
-            models.category.create(postData).then(offers => {
+            models.offers.create(postData).then(offers => {
                 if (offers) {
                     result.success = true;
                     result.message = 'Offer successfully created';
@@ -49,8 +49,13 @@ exports.GetOffers = (req, res) => {
             response.success = true;
             response.data = {
                 'offer_name': offers.offer_name,
-                'offer_desc': offers.offer_desc,
-                'path': offers.path,
+                'offer_code' : offers.offer_code,
+                'desc': offers.desc,
+                'discount_type': offers.discount_type,
+                'discount_value': offers.discount_value,
+                'limit': offers.limit,
+                'limit_value': offers.limit_value,
+                'offer_img': offers.offer_img,
                 'status': offers.status,
                 'id': offers.id
             };
@@ -70,9 +75,10 @@ exports.GetOffers = (req, res) => {
 
 exports.UpdateOffer = function(request, response){
     let postData = utils.DeepTrim(request.body);
-    models.offer.findOne({ where: {id: postData.id}, required: false}).then(offers => {
+    models.offers.findOne({ where: {id: postData.id}, required: false}).then(offers => {
             let result = {};
-            if(offers){                                         
+            if(offers){         
+                console.log(postData)                                
                 offers.updateAttributes(postData).then((updateOffer)=>{
                             if(updateOffer){
                                     result.success = true;
@@ -109,7 +115,7 @@ exports.Offers = function (req, res, next) {
     if (utils.objLen(req.query)) Object.assign(where, req.query);
     // find categories
     models.offer.findAll({
-        attributes: ['id', 'category_name'],
+        attributes: ['id', 'offer_name'],
         where: where
     }).then(function (offers) {
         if (!offers) {
@@ -128,7 +134,7 @@ exports.Upload = function (request,response){
         json_data.success = false;
         if(request.file){
             json_data['success'] =  true;
-            json_data['data'] =  'offer_images/'+request.file.filename; 
+            json_data['data'] =  'offers_images/'+request.file.filename; 
             json_data['mimetype'] =  request.file.mimetype; 
             json_data['name'] =  request.file.originalname;        
         }
@@ -173,14 +179,14 @@ filterOffers = (req, res ,cb)=>{
 
     async.parallel([
         (callback) => {
-            models.offer.findAll({where: where,attributes:['id']}).then(projects => {                    
+            models.offers.findAll({where: where,attributes:['id']}).then(projects => {                    
                 callback(null,projects.length);
             }).catch(function (err) {
                 callback(err);
             });                
         },
         (callback) => {
-            models.offer.findAll({ where: where,
+            models.offers.findAll({ where: where,
                 order: [
                     orderBy
                 ],
@@ -220,7 +226,7 @@ exports.DeleteOffer = function(request, response){
     // let id = request.params.id;
     let result = {};
     if(request.params.id != undefined){
-        models.offer.destroy({where: {id: request.params.id}}).then((rowDeleted)=>{
+        models.offers.destroy({where: {id: request.params.id}}).then((rowDeleted)=>{
             result.success = true;
             result.message = (rowDeleted === 1) ? 'Offer deleted successfully' : 'Unable to delete Offer';
             response.json(result);
