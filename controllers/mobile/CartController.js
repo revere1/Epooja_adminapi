@@ -28,15 +28,18 @@ exports.addToCart = function(req,res){
                 uid:uid
             }
         }).then(function(exist){
+            let smsg = '';
            if(exist){
                let pcount = exist.pcount;
                if(opr == 'add')
                {
                    pcount = pcount + 1;
+                   smsg = "Product succefully added to cart";
                }
                if(opr == 'sub')
                {
                    pcount = pcount - 1;
+                   smsg = "Product succefully removed from cart";
                }
 
                models.products.findOne({where:{id:pid}}).then(function(products){
@@ -50,14 +53,14 @@ exports.addToCart = function(req,res){
                              {
                                  res.json({
                                      success:true,
-                                     message:"Product succefully added to cart"
+                                     message:smsg
                                  });
                              }
                              else
                              {
                                  res.json({
                                      success:false,
-                                     message:"Adding product to cart failed. Please try again"
+                                     message:"Something went wrong. Please try again"
                                  });
                              }
                  
@@ -141,7 +144,13 @@ exports.getCart = function(req,res)
     models.cart.findAll({where:{uid:uid},include:[{model:models.products,attributes:['id','product_img','cost','product_name']}]}).then(function(cartitems){
         if(cartitems)
         {
-            res.json({success:true,cartitems:cartitems});
+            models.mobile_user_address.findOne({where:{user_id:uid,default_address:1}}).then(default_addr=>{
+                if(default_addr){
+                res.json({success:true,cartitems:cartitems,default_addr:default_addr});
+                }else{
+                    res.json({success:true,cartitems:cartitems,default_addr:''});
+                }
+            });
         }
         else
         {

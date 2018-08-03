@@ -147,12 +147,22 @@ exports.saveUserAddress = function(req,res){
 if(aerrs.length > 0){
     res.json({success:false,aerrors:aerrs});
 }else{
+
     models.mobile_user_address.create(postData).then((saddr)=>{
         if(saddr)
-        { 
-            result.success = true;
+        {
+            if(postData.default_address == 1){
+                models.mobile_user_address.update({default_address:0},{where:{user_id:uid}}).then(data => {
+                    result.success = true;
+                    result.message = 'User address successfully added';
+                    res.json(result);
+                });
+            }else{
+                result.success = true;
             result.message = 'User address successfully added';
             res.json(result);
+            }
+            
         }
     else{
         noResults(result, res)
