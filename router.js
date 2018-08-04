@@ -15,6 +15,8 @@ var EInsightsController = require('./controllers/elastic/EInsightsController');
 var EUserController = require('./controllers/elastic/EUserController');
 var DashboardController = require('./controllers/DashboardController');
 
+var banners = require('./controllers/BannersController');
+
 
 var express = require('express');
 var jwt = require('jsonwebtoken');
@@ -337,6 +339,13 @@ module.exports = function (app) {
     apiRoutes.post('/daywise-counts', AdminController.DayWiseCounts);
     //apiRoutes.get('/subsector', SubsectorController.Subsector);
 
+    apiRoutes.get('/get-all-aprods',ProductController.getAllActiveProducts);
+    apiRoutes.get('/get-all-acats',CategoryController.getAllActiveCats);
+    apiRoutes.post('/banners/path', banners.uploadBanner);
+    apiRoutes.post('/add-banner', banners.addBanner);
+    apiRoutes.post('/get-banners',banners.getBanners);
+
+    
     
     //Middleware function to authentication
     apiRoutes.use(UserController.authenticate);

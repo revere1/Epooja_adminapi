@@ -8,9 +8,6 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      desc: {
-        type: Sequelize.STRING
-      },
       banner: {
         type: Sequelize.STRING
       },

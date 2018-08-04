@@ -294,3 +294,20 @@ exports.DeleteCategory = function(request, response){
         response.json(result);
     }   
 };
+exports.getAllActiveCats = function(req,res){
+    models.categories.findAll({
+        where:{
+            status:'active'
+        },
+        attributes:['id',['category_name','bname']]
+    }).then(function(categories){
+        if(categories){
+            res.json({success:true,categories:categories})
+        }else{
+            res.json({
+                success:false,
+                message:'Something went wrong.Try again'
+            });
+        }
+    });
+}

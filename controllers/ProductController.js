@@ -544,3 +544,21 @@ exports.UploadImage = function (request, response) {
         response.json(json_data);
     });
 }
+
+exports.getAllActiveProducts = function(req,res){
+    models.products.findAll({
+        where:{
+            status:'active'
+        },
+        attributes:['id',['product_name','bname']]
+    }).then(function(products){
+        if(products){
+            res.json({success:true,products:products})
+        }else{
+            res.json({
+                success:false,
+                message:'Something went wrong.Try again'
+            });
+        }
+    });
+}

@@ -1,7 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   var banners = sequelize.define('banners', {
-    desc: DataTypes.STRING,
     banner: DataTypes.STRING,
     btype: DataTypes.INTEGER,
     btype_id: DataTypes.INTEGER,
