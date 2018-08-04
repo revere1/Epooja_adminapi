@@ -138,12 +138,12 @@ noResults = (result, response) => {
     response.json(result);
 }
 
-// createProductsFiles = (postData, cb) => {
-//     console.log(postData)
-//     models.product_images.create(postData).then(product_images => {
-//         cb(product_images);
-//     });
-// }
+createProductsFiles = (postData, cb) => {
+    console.log(postData)
+    models.product_images.create(postData).then(product_images => {
+        cb(product_images);
+    });
+}
 
 createInsightFiles = (postData, cb) => {
     console.log(postData)
@@ -184,10 +184,11 @@ exports.GetProduct = (req, res) => {
             });
             response.success = true;
             response.data = products;
+            console.log(response.data)
         }
         else {
             response.success = false;
-            response.message = 'No Insights found';
+            response.message = 'No Products found';
         }
         res.json(response);
     });
@@ -241,9 +242,9 @@ exports.FilterProducts = (req, res) => {
 
 filterProducts = (req, res, cb) => {
     models.products = models.products;
-    models.products.belongsTo(models.subcategory,{ foreignKey: 'subcategory_id' });
-    models.products.belongsTo(models.category,{ foreignKey: 'category_id' });
-    
+    models.products.belongsTo(models.category,{foreignKey: 'category_id' });
+    models.products.belongsTo(models.subcategory,{foreignKey: 'subcategory_id' });
+  
     pData = req.body;
     where = sort = {};
     if (pData.columns.length) {
@@ -265,10 +266,10 @@ filterProducts = (req, res, cb) => {
                 likeCond.push(item);
             });
             likeCond.push(Sequelize.where(Sequelize.col(`category.category_name`), {
-                like: '%' + pData.search.value + '%'
+                //like: '%' + pData.search.value + '%'
             }));
             likeCond.push(Sequelize.where(Sequelize.col(`subcategory.subcategory_name`), {
-                like: '%' + pData.search.value + '%'
+                //like: '%' + pData.search.value + '%'
             }));
             where = { [Op.or]: likeCond };
         }
@@ -277,18 +278,21 @@ filterProducts = (req, res, cb) => {
 
     let options = {
         where: where,
-        attributes: ['id', 'product_name','product_code','product_description', 'product_img','cost','delivery_days', 'quantity','status'],
+        attributes: ['id', 'product_name','product_code','product_description','product_img','cost','delivery_days', 'quantity','status'],
         include: [
             {
                 model: models.category,
-                attributes: ['category_name']
+                attributes: ['category_name'],
+                //required:false
             },
             {
                 model: models.subcategory,
-                attributes: ['subcategory_name']
+                attributes: ['subcategory_name'],
+                //required:false
             }
+           
         ],
-        //raw: true
+        raw: true
     };
     async.parallel([
         (callback) => {
@@ -311,8 +315,8 @@ filterProducts = (req, res, cb) => {
                     orderBy
                 ],
                 limit:pData.length, offset:pData.start})
-            .then(lockers => {
-                callback(null,lockers);
+            .then(products => {
+                callback(null,products);
             })
             .catch(function (err) {
                 callback(err);
@@ -322,12 +326,14 @@ filterProducts = (req, res, cb) => {
             Object.assign(options, { order: [orderBy], limit: pData.length, offset: pData.start });
             models.products.findAll(options).then(products => {
                     callback(null, products);
+                    console.log(products)
                 }).catch(function (err) {
                     callback(err);
                 });
         }
     ], (err, results) => {
         let json_res = {};
+     
         json_res['draw'] = pData.draw;
         if (err) {
             json_res['success'] = false;
