@@ -73,11 +73,13 @@ exports.getBanners = function(req,res){
     let options = {
         where: where,
         attributes: ['id', 'banner','btype','btype_id', 'status'],
+
         include: [
             {
                 model: models.category,               
                 attributes: ['category_name'],
-                where:{'$banners.btype$':1}
+                where:{'$banners.btype$':1},
+                required:false
             },
             {
                 model: models.products,
@@ -97,12 +99,13 @@ exports.getBanners = function(req,res){
             });                
         },
         (callback) => {
-            models.banners.findAll({ where: where,
+            models.banners.findAll(options,{ where: where,
                 order: [
                     orderBy
                 ],
                 limit:pData.length, offset:pData.start})
             .then(banners => {
+                
                 callback(null,banners);
             })
             .catch(function (err) {
@@ -127,4 +130,29 @@ exports.getBanners = function(req,res){
         }                   
         res.json(json_res);
     })
+}
+
+exports.deleteBanner = function (req,res){
+let id = req.body.banner_id;
+
+if(isNaN(id)){
+    res.json({success:false,message:'Invalid banner id'});
+}else{
+    models.banners.findOne({where:{id:id}}).then(res=>{
+        if(res){
+            models.banners.destroy({where:{id:id}}).then(del=>{
+                if(del){
+                if(fs.existsSync('uploads/'+res.banner)){
+                    fs.unlinkSync('uploads/' + res.banner)
+                }
+                res.json({success:true,message:'Banner deleted successfully'});
+            }else{
+                res.json({success:false,message:'Something went wrong.Please try again'});
+            }
+            })
+            
+        }
+    });
+}
+
 }

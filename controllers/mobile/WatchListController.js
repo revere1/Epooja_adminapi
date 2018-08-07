@@ -41,7 +41,7 @@ exports.addToWl = function(req,res){
 
 }
 exports.removeFromWl = function(req,res){
-    let wlid = req.body.cid;
+    let wlid = req.body.wlid;
     if(isNaN(wlid))
     {
         res.json({
@@ -81,8 +81,8 @@ exports.getWatchList = function(req,res){
     }
     else
     {
-    models.watchlist.hasOne(models.products,{ foreignKey: 'pid' });
-    models.watchlist.findAll({where:{uid:uid}}).then(function(watchlist){
+    models.watchlist.belongsTo(models.products,{ foreignKey: 'pid' });
+    models.watchlist.findAll({where:{uid:uid},include:[{model:models.products,attributes:['id','product_img','cost','product_name']}]}).then(function(watchlist){
         if(watchlist)
         {
             res.json({success:true,watchlist:watchlist});

@@ -344,6 +344,7 @@ module.exports = function (app) {
     apiRoutes.post('/banners/path', banners.uploadBanner);
     apiRoutes.post('/add-banner', banners.addBanner);
     apiRoutes.post('/get-banners',banners.getBanners);
+    apiRoutes.post('/delete-banner',banners.deleteBanner);
 
     
     
