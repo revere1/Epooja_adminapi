@@ -182,7 +182,40 @@ if(aerrs.length > 0){
 }
     
 }
+exports.removeFromAddr = function(req,res){
+    let id = req.body.id;
+    if(isNaN(id))
+    {
+        res.json({
+            success:false,
+            message:"Invalid id"
+        });    
+    }
+    else
+    {
+        models.mobile_user_address.destroy({
+            where:{
+                id:id
+            }
+        }).then(function(status){
+            if(status)
+            {
+                res.json({
+                    success:true,
+                    message:" successfully removed from Addresses"
+                });    
+            }
+            else
+            {
+                res.json({
+                    success:false,
+                    message:"Address not removed.Please try again"
+                });    
+            }
 
+        })
+    }
+}
 exports.getUserAddresses = function(req,res){
     let user_id = req.body.user_id;
     let results = {};
@@ -198,7 +231,7 @@ exports.getUserAddresses = function(req,res){
             results.addresses = adrs;
             res.json(results);
         }).catch(function (err) {
-            return response.status(400).json({
+            return res.status(400).json({
                 success: false,
                 message: err
             });

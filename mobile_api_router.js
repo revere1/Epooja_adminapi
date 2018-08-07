@@ -12,6 +12,7 @@ module.exports = function (app) {
     apiRoutes.post('/register',muser.VerifyApiCode,muser.Register);
     apiRoutes.post('/add-address',muser.authenticate,muser.saveUserAddress);
     apiRoutes.post('/get-addresses',muser.authenticate,muser.getUserAddresses);
+    apiRoutes.post('/remove-from-addr',muser.authenticate,muser.removeFromAddr);
 
     apiRoutes.get('/categories',muser.authenticate,mproducts.GetCategories);
     apiRoutes.get('/subcategories/:cat_id',muser.authenticate,mproducts.GetSubCategories);
