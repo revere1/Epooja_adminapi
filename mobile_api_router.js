@@ -14,6 +14,7 @@ module.exports = function (app) {
     apiRoutes.post('/add-address',muser.authenticate,muser.saveUserAddress);
     apiRoutes.post('/get-addresses',muser.authenticate,muser.getUserAddresses);
     apiRoutes.post('/remove-from-addr',muser.authenticate,muser.removeFromAddr);
+    apiRoutes.put('/update-addr',muser.authenticate,muser.updateAddr);
 
     apiRoutes.get('/categories',muser.authenticate,mproducts.GetCategories);
     apiRoutes.get('/subcategories/:cat_id',muser.authenticate,mproducts.GetSubCategories);
@@ -24,6 +25,7 @@ module.exports = function (app) {
     
     apiRoutes.post('/get-states',muser.authenticate,mdata.getStates); 
     apiRoutes.get('/get-countries',muser.authenticate,mdata.getCountries);
+    apiRoutes.get('/get-offers',muser.authenticate,mdata.getOffers);
 
     apiRoutes.post('/add-to-cart',muser.authenticate,cart.addToCart);
     apiRoutes.post('/remove-from-cart',muser.authenticate,cart.removeFromCart);
