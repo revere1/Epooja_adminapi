@@ -138,14 +138,14 @@ let id = req.body.banner_id;
 if(isNaN(id)){
     res.json({success:false,message:'Invalid banner id'});
 }else{
-    models.banners.findOne({where:{id:id}}).then(res=>{
-        if(res){
+    models.banners.findOne({where:{id:id}}).then(exist=>{
+        if(exist){
             models.banners.destroy({where:{id:id}}).then(del=>{
                 if(del){
                 if(fs.existsSync('uploads/'+res.banner)){
                     fs.unlinkSync('uploads/' + res.banner)
                 }
-                res.json({success:true,message:'Banner deleted successfully'});
+                res.json({success:true,message:'Banner  deleted successfully'});
             }else{
                 res.json({success:false,message:'Something went wrong.Please try again'});
             }

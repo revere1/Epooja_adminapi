@@ -3,6 +3,7 @@ var mproducts = require('./controllers/mobile/ProductsController');
 var mdata = require('./controllers/mobile/DataController');
 var cart = require('./controllers/mobile/CartController');
 var wl = require('./controllers/mobile/WatchListController');
+var others = require('./controllers/mobile/OthersController');
 
 var express = require('express');
 
@@ -32,6 +33,8 @@ module.exports = function (app) {
     apiRoutes.post('/add-to-wl',muser.authenticate,wl.addToWl);
     apiRoutes.post('/remove-from-wl',muser.authenticate,wl.removeFromWl);
     apiRoutes.post('/watchlist',muser.authenticate,wl.getWatchList);
+
+    apiRoutes.post('/banners',muser.authenticate,others.getBanners);
     
     app.use('/app', apiRoutes);    
 };
