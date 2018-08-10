@@ -13,9 +13,12 @@ exports.getCountries = function(req,res){
             status:'active'
         }
     }).then(countries=>{
-        if(countries){
+        if(countries)
+        {
             res.json({success:true,countries:countries});
-        }else{
+        }
+        else
+        {
             res.json({success:false,message:"Something went wrong,Please try again"});
         }
     }).catch(function (err) {
@@ -36,16 +39,40 @@ exports.getStates = function(req,res){
             }
         }).then(states=>{
             
-            if(states){
+            if(states)
+            {
                 res.json({success:true,states:states});
-            }else{
+            }
+            else
+            {
                 res.json({success:false,message:"Something went wrong,Please try again"});
             }
         }).catch(function (err) {
             return res.json({success:false,message:err.message});
-         });
-    }else
+        });
+    }
+    else
     {
         res.json({success:false,message:'Invalid request,country id missing'});
     }
 }
+exports.getOffers = function(req,res){
+
+    models.offers.findAll({
+        where:{
+            status:'active'
+        }
+    }).then(offers=>{
+        if(offers)
+        {
+            res.json({success:true,offers:offers});
+        }
+        else
+        {
+            res.json({success:false,message:"Something went wrong,Please try again"});
+        }
+    }).catch(function (err) 
+    {
+       return res.json({success:false,message:err.message});
+    });
+};

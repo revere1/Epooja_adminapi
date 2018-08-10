@@ -112,79 +112,80 @@ exports.Login = (req,res)=>
 };
 
 
-exports.saveUserAddress = function(req,res){
+exports.saveUserAddress = function (req, res) {
     let postData = req.body;
     let result = {};
     let aerrs = [];
 
-    if(isNaN(postData.user_id )){
+    if (isNaN(postData.user_id)) {
         aerrs.push('Invalid user');
     }
-    if(postData.full_name == '' || postData.full_name.length < 2 ||  postData.full_name.length > 50){
+    if (postData.full_name == '' || postData.full_name.length < 2 || postData.full_name.length > 50) {
         aerrs.push('Name should be in betwwen 3 to 50 characters');
     }
-    if(postData.address1 == ''){
+    if (postData.address1 == '') {
         aerrs.push('Address1 should not be empty');
     }
-    if(postData.address2 == ''){
+    if (postData.address2 == '') {
         aerrs.push('Address2 should not be empty');
     }
-    if(postData.city == ''){
+    if (postData.city == '') {
         aerrs.push('City should not be empty');
     }
-    if(postData.state == ''){
+    if (postData.state == '') {
         aerrs.push('State should not be empty');
     }
-    if(postData.country == ''){
+    if (postData.country == '') {
         aerrs.push('Country should not be empty');
     }
-    if(isNaN(postData.contact_number ) || postData.contact_number.length < 10 ||  postData.contact_number.length > 12){
+    if (isNaN(postData.contact_number) || postData.contact_number.length < 10 || postData.contact_number.length > 12) {
         aerrs.push('Invalid mobile number');
     }
-    if(isNaN(postData.postal_code ) || postData.postal_code.length < 6 ||  postData.postal_code.length > 8){
+    if (isNaN(postData.postal_code) || postData.postal_code.length < 6 || postData.postal_code.length > 8) {
         aerrs.push('Invalid posatl code');
     }
-if(aerrs.length > 0){
-    res.json({success:false,aerrors:aerrs});
-}else{
-
-    models.mobile_user_address.create(postData).then((saddr)=>{
-        if(saddr)
-        {
-            if(postData.default_address == 1){
-                models.mobile_user_address.update({default_address:0},{where:{user_id:uid}}).then(data => {
+    if (aerrs.length > 0) {
+        res.json({ success: false, aerrors: aerrs });
+    }
+    else 
+    {
+        models.mobile_user_address.create(postData).then((saddr) => {
+            if (saddr) {
+                if (postData.default_address == 1) 
+                {
+                    models.mobile_user_address.update({ default_address: 0 }, { where: { user_id:saddr.user_id } }).then(data => {
+                        result.success = true;
+                        result.message = 'User address successfully added';
+                        res.json(result);
+                    });
+                }
+                else 
+                {
                     result.success = true;
                     result.message = 'User address successfully added';
                     res.json(result);
-                });
-            }else{
-                result.success = true;
-            result.message = 'User address successfully added';
-            res.json(result);
+                }
             }
-            
-        }
-    else{
-        noResults(result, res)
+            else 
+            {
+                noResults(result, res)
+            }
+        }).catch(Sequelize.ValidationError, function (err) {
+            return response.status(200).json({
+                success: false,
+                message: err.message
+            });
+        }).catch(function (err) {
+            return response.status(400).json({
+                success: false,
+                message: err
+            });
+        });
     }
-}).catch(Sequelize.ValidationError, function (err) {
-    return response.status(200).json({
-            success: false,
-            message: err.message
-    });
-}).catch(function (err) {
-                                  
-    return response.status(400).json({
-            success: false,
-            message: err
-    });
-});
-}
-    
 }
 exports.removeFromAddr = function(req,res){
-    let id = req.body.id;
-    if(isNaN(id))
+    let addrid = req.body.addrid;
+    if(isNaN(addrid))
     {
         res.json({
             success:false,
@@ -195,7 +196,7 @@ exports.removeFromAddr = function(req,res){
     {
         models.mobile_user_address.destroy({
             where:{
-                id:id
+                id:addrid
             }
         }).then(function(status){
             if(status)
@@ -213,6 +214,79 @@ exports.removeFromAddr = function(req,res){
                 });    
             }
 
+        })
+    }
+}
+exports.updateAddr = function(req,res){
+    let postData = req.body;
+    if(isNaN(postData.addrid))
+    {
+        res.json({
+            success:false,
+            message:"Invalid id"
+        });    
+    }
+    else
+    {
+        models.mobile_user_address.findOne({
+            where:{
+                id:postData.addrid
+            }
+        }).then(function(addr){
+            if(addr)
+            {
+                addr.updateAttributes(postData).then(function(status){
+                    if(status)
+                    {          
+                        if(postData.default_address == 1){
+                            models.mobile_user_address.update({default_address:0},{where:{user_id:addr.user_id,id: { [Op.ne]: postData.addrid} }}).then(data => {
+                                res.json({
+                                    success:true,
+                                    message:'User address successfully Update'
+                                }); 
+                            });
+                        }
+                        else 
+                        {
+                            res.json({
+                                success:true,
+                                message:" successfully Update Addresses"
+                            }); 
+                        }                 
+                    }
+                    else
+                    {
+                        res.json({
+                            success:true,
+                            message:"Address not Updated.Please try again"
+                        });    
+                    }
+                }).catch(Sequelize.ValidationError,function(err){
+
+                    res.json({
+                        success:false,
+                        status:200,
+                        message:err.message
+                    }); 
+
+                })
+                .catch( function(err) {
+
+                    res.json({
+                        success:false,
+                        status:400,
+                        message:err
+                    }); 
+
+                });               
+            }
+            else
+            {
+                res.json({
+                    success:false,
+                    message:"Address not Exited"
+                });   
+            }
         })
     }
 }
